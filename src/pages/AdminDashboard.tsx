@@ -10,6 +10,10 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
+import PackageManager from '@/components/admin/PackageManager';
+import UserRoleManager from '@/components/admin/UserRoleManager';
+import BlogEditor from '@/components/admin/BlogEditor';
+import GalleryManager from '@/components/admin/GalleryManager';
 
 interface Stats {
   packages: number;
@@ -276,7 +280,11 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {activeSection !== 'dashboard' && (
+          {activeSection === 'packages' && <PackageManager />}
+          {activeSection === 'users' && <UserRoleManager />}
+          {activeSection === 'blog' && <BlogEditor />}
+          {activeSection === 'gallery' && <GalleryManager />}
+          {!['dashboard', 'packages', 'users', 'blog', 'gallery'].includes(activeSection) && (
             <SectionPlaceholder section={activeSection} />
           )}
         </div>
