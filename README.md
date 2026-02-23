@@ -1,73 +1,110 @@
-# Welcome to your Lovable project
+# ESA Tours - Explore Kigali Hub
 
-## Project info
+A comprehensive tourism platform for Rwanda, built with modern web technologies. Discover Kigali, book tours, find internships, and explore the beauty of Rwanda.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🌍 About ESA Tours
 
-## How can I edit this code?
+ESA Tours is Rwanda's premier tourism platform that connects travelers with authentic experiences, local guides, and unique opportunities. Our platform offers:
 
-There are several ways of editing your application.
+- **Tour Packages**: Curated experiences across Rwanda
+- **Internship Opportunities**: Connect with local businesses and organizations
+- **Information Centers**: Comprehensive guides and resources
+- **Gallery**: Showcase of Rwanda's natural beauty and culture
+- **Blog**: Travel tips, stories, and insights
 
-**Use Lovable**
+## 🚀 Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- **Multi-role Authentication**: Admin, Tour Manager, Accountant, and Client dashboards
+- **Dynamic Content Management**: Blog posts, packages, galleries
+- **Booking System**: Seamless tour and internship bookings
+- **Admin Panel**: Complete system management and analytics
+- **Responsive Design**: Optimized for all devices
+- **Multi-language Support**: English and local languages
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Tech Stack
 
-**Use your preferred IDE**
+- **Frontend**: React 18, TypeScript, Vite
+- **UI Framework**: shadcn/ui, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **State Management**: React Context, TanStack Query
+- **Icons**: Lucide React
+- **Charts**: Recharts
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 📦 Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Clone the repository**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd esa-tours-explore-kigali
+   ```
 
-Follow these steps:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Supabase credentials
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+4. **Start development server**
+   ```bash
+   npm run dev
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🔧 Available Scripts
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+- `npm run test` - Run tests
+
+## 🌐 Deployment
+
+The application is configured for deployment on Vercel, Netlify, or any static hosting service.
+
+### Environment Variables
+
+Create a `.env` file with:
+
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_key
 ```
 
-**Edit a file directly in GitHub**
+## 📁 Project Structure
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+src/
+├── components/          # Reusable UI components
+├── pages/              # Page components
+├── contexts/           # React contexts (Auth, Settings, Language)
+├── hooks/              # Custom React hooks
+├── lib/                # Utility functions
+├── integrations/       # External service integrations
+└── assets/             # Static assets
+```
 
-**Use GitHub Codespaces**
+## 🤝 Contributing
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## What technologies are used for this project?
+## 📄 License
 
-This project is built with:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📞 Contact
 
-## How can I deploy this project?
+ESA Tours - Explore Kigali Hub
+Website: [explore-kigali-hub.vercel.app](https://explore-kigali-hub.vercel.app)
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Built with ❤️ for Rwanda's tourism industry
