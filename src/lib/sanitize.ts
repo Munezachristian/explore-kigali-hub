@@ -22,8 +22,7 @@ export function sanitizeString(input: string, maxLength = 1000): string {
   let sanitized = input
     .slice(0, maxLength)
     .replace(/\0/g, '') // Remove null bytes
-    .replace(XSS_PATTERNS, '')
-    .trim();
+    .replace(XSS_PATTERNS, '');
   
   return sanitized;
 }

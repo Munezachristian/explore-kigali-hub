@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      advertisements: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          end_date: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          link_url: string
+          media_type: string
+          show_after_seconds: number
+          show_once_per_session: boolean
+          start_date: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_url: string
+          media_type?: string
+          show_after_seconds?: number
+          show_once_per_session?: boolean
+          start_date?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_url?: string
+          media_type?: string
+          show_after_seconds?: number
+          show_once_per_session?: boolean
+          start_date?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string | null
@@ -153,6 +204,36 @@ export type Database = {
           },
         ]
       }
+      expenses: {
+        Row: {
+          amount: number
+          category: string | null
+          created_at: string | null
+          description: string | null
+          expense_date: string | null
+          id: string
+          recorded_by: string | null
+        }
+        Insert: {
+          amount: number
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          expense_date?: string | null
+          id?: string
+          recorded_by?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          expense_date?: string | null
+          id?: string
+          recorded_by?: string | null
+        }
+        Relationships: []
+      }
       gallery: {
         Row: {
           category: string | null
@@ -188,6 +269,47 @@ export type Database = {
           uploaded_by?: string | null
         }
         Relationships: []
+      }
+      incomes: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          income_date: string | null
+          recorded_by: string | null
+          source: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          income_date?: string | null
+          recorded_by?: string | null
+          source?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          income_date?: string | null
+          recorded_by?: string | null
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incomes_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       information_center: {
         Row: {
@@ -225,81 +347,33 @@ export type Database = {
         }
         Relationships: []
       }
-      information_centers: {
-        Row: {
-          id: string
-          name: string
-          description: string | null
-          address: string
-          latitude: number
-          longitude: number
-          phone: string | null
-          email: string | null
-          opening_hours: string | null
-          status: 'published' | 'unpublished' | 'deleted'
-          created_at: string
-          updated_at: string
-          created_by: string | null
-        }
-        Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          address: string
-          latitude: number
-          longitude: number
-          phone?: string | null
-          email?: string | null
-          opening_hours?: string | null
-          status?: 'published' | 'unpublished' | 'deleted'
-          created_at?: string
-          updated_at?: string
-          created_by?: string | null
-        }
-        Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          address?: string
-          latitude?: number
-          longitude?: number
-          phone?: string | null
-          email?: string | null
-          opening_hours?: string | null
-          status?: 'published' | 'unpublished' | 'deleted'
-          created_at?: string
-          updated_at?: string
-          created_by?: string | null
-        }
-        Relationships: []
-      }
       information_center_media: {
         Row: {
+          created_at: string | null
+          display_order: number | null
           id: string
           information_center_id: string
-          media_type: 'image' | 'video'
-          media_url: string
           is_primary: boolean | null
-          display_order: number | null
-          created_at: string
+          media_type: string
+          media_url: string
         }
         Insert: {
+          created_at?: string | null
+          display_order?: number | null
           id?: string
           information_center_id: string
-          media_type: 'image' | 'video'
-          media_url: string
           is_primary?: boolean | null
-          display_order?: number | null
-          created_at?: string
+          media_type: string
+          media_url: string
         }
         Update: {
+          created_at?: string | null
+          display_order?: number | null
           id?: string
           information_center_id?: string
-          media_type?: 'image' | 'video'
-          media_url?: string
           is_primary?: boolean | null
-          display_order?: number | null
-          created_at?: string
+          media_type?: string
+          media_url?: string
         }
         Relationships: [
           {
@@ -309,7 +383,62 @@ export type Database = {
             referencedRelation: "information_centers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "information_center_media_information_center_id_fkey"
+            columns: ["information_center_id"]
+            isOneToOne: false
+            referencedRelation: "information_centers"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      information_centers: {
+        Row: {
+          address: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          email: string | null
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          opening_hours: string | null
+          phone: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          latitude: number
+          longitude: number
+          name: string
+          opening_hours?: string | null
+          phone?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          opening_hours?: string | null
+          phone?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       internships: {
         Row: {
@@ -531,6 +660,42 @@ export type Database = {
           },
         ]
       }
+      salary_payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          notes: string | null
+          paid_date: string
+          period_end: string | null
+          period_start: string | null
+          recorded_by: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          paid_date: string
+          period_end?: string | null
+          period_start?: string | null
+          recorded_by?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          paid_date?: string
+          period_end?: string | null
+          period_start?: string | null
+          recorded_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       saved_packages: {
         Row: {
           created_at: string
@@ -619,34 +784,34 @@ export type Database = {
       }
       system_settings: {
         Row: {
+          category: string
+          data_type: string | null
+          description: string | null
           id: string
           key: string
-          value: string | null
-          description: string | null
-          category: string
-          data_type: 'string' | 'number' | 'boolean' | 'json' | 'color' | 'file'
-          updated_at: string
+          updated_at: string | null
           updated_by: string | null
+          value: string | null
         }
         Insert: {
+          category?: string
+          data_type?: string | null
+          description?: string | null
           id?: string
           key: string
-          value?: string | null
-          description?: string | null
-          category?: string
-          data_type?: 'string' | 'number' | 'boolean' | 'json' | 'color' | 'file'
-          updated_at?: string
+          updated_at?: string | null
           updated_by?: string | null
+          value?: string | null
         }
         Update: {
+          category?: string
+          data_type?: string | null
+          description?: string | null
           id?: string
           key?: string
-          value?: string | null
-          description?: string | null
-          category?: string
-          data_type?: 'string' | 'number' | 'boolean' | 'json' | 'color' | 'file'
-          updated_at?: string
+          updated_at?: string | null
           updated_by?: string | null
+          value?: string | null
         }
         Relationships: []
       }
@@ -742,12 +907,50 @@ export type Database = {
         }
         Relationships: []
       }
+      user_salary_config: {
+        Row: {
+          created_at: string | null
+          effective_from: string | null
+          effective_to: string | null
+          id: string
+          notes: string | null
+          salary_amount: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          notes?: string | null
+          salary_amount: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          notes?: string | null
+          salary_amount?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_highest_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      get_user_role_simple: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }

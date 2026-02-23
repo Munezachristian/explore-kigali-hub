@@ -52,7 +52,7 @@ export function AdvertisementPopup() {
     const run = async () => {
       const now = new Date().toISOString();
       const { data, error } = await supabase
-        .from('advertisements')
+        .from('advertisements' as any)
         .select('id, title, description, image_url, media_type, link_url, show_after_seconds, start_date, end_date, show_once_per_session')
         .eq('is_active', true)
         .order('display_order', { ascending: true })
@@ -60,7 +60,7 @@ export function AdvertisementPopup() {
 
       if (!mounted || error || !data?.length) return;
 
-      let candidates = (data as Ad[]).filter((a) => a.image_url);
+      let candidates = (data as unknown as Ad[]).filter((a) => a.image_url);
       if (candidates.length > 0) {
         candidates = candidates.filter((a) => {
           if (a.start_date && now < a.start_date) return false;

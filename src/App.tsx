@@ -32,6 +32,7 @@ import Sitemap from "./pages/Sitemap";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SeoHead } from "./components/SeoHead";
 import { AdvertisementPopup } from "./components/AdvertisementPopup";
+import WhatsAppButton from "./components/WhatsAppButton";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
             <ScrollToTop />
             <SeoHead />
             <AdvertisementPopup />
+            <WhatsAppButton />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
