@@ -3,8 +3,10 @@ import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Send } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const Footer = () => {
+  const { settings } = useSettings();
   const [email, setEmail] = useState('');
 
   const handleNewsletter = (e: React.FormEvent) => {
@@ -45,16 +47,20 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-gold rounded-xl flex items-center justify-center">
-                <span className="text-navy font-display font-bold text-lg">E</span>
-              </div>
+              {settings.system_logo ? (
+                <img src={settings.system_logo} alt={settings.system_name} className="h-10 w-auto object-contain" />
+              ) : (
+                <div className="w-10 h-10 bg-gradient-gold rounded-xl flex items-center justify-center">
+                  <span className="text-navy font-display font-bold text-lg">E</span>
+                </div>
+              )}
               <div>
-                <span className="text-white font-display font-bold text-xl">ESA Tours</span>
+                <span className="text-white font-display font-bold text-xl">{settings.system_name}</span>
                 <div className="text-gold text-xs tracking-widest uppercase opacity-80">Kigali • Rwanda</div>
               </div>
             </div>
             <p className="text-white/60 font-body text-sm leading-relaxed mb-6">
-              Your premier gateway to authentic African tourism experiences. We craft unforgettable journeys across Rwanda and East Africa.
+              {settings.system_description || 'Your premier gateway to authentic African tourism experiences. We craft unforgettable journeys across Rwanda and East Africa.'}
             </p>
             <div className="flex gap-3">
               {[

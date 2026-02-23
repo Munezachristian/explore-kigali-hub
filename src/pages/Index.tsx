@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, MapPin, Clock, Users, ChevronRight, Shield, Award, Globe2, Headphones } from 'lucide-react';
+import { ArrowRight, Star, MapPin, Clock, Users, ChevronRight, Shield, Award, Globe2, Headphones, Phone, Mail, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
 import heroImage from '@/assets/hero-rwanda.jpg';
 import Navbar from '@/components/Navbar';
@@ -27,25 +28,45 @@ const categories = ['All', 'Wildlife', 'Cultural', 'Adventure', 'Safari', 'Beach
 
 const Index = () => {
   const { t } = useLanguage();
+  const { settings } = useSettings();
   const [packages, setPackages] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
+  const [infoCenters, setInfoCenters] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState('All');
 
   useEffect(() => {
-    const fetchData = async () => {
-      const [{ data: pkgs }, { data: testi }, { data: blogs }, { data: gal }] = await Promise.all([
-        supabase.from('packages').select('*').eq('is_featured', true).limit(6),
-        supabase.from('testimonials').select('*').eq('is_approved', true).limit(4),
-        supabase.from('blog_posts').select('*').eq('status', 'published').limit(3),
-        supabase.from('gallery').select('*').limit(6),
-      ]);
-      if (pkgs) setPackages(pkgs);
-      if (testi) setTestimonials(testi);
-      if (blogs) setBlogPosts(blogs);
-      if (gal) setGallery(gal);
+    const testConnection = async () => {
+      try {
+        const { data, error } = await supabase.from('settings').select('key, value').limit(1);
+        if (error) console.error('Supabase connection error:', error);
+      } catch (e) {
+        console.error('Connection test failed:', e);
+      }
     };
+    
+    const fetchData = async () => {
+      try {
+        const [{ data: pkgs, error: pkgError }, { data: testi, error: testiError }, { data: blogs, error: blogError }, { data: gal, error: galError }, { data: centers, error: centersError }] = await Promise.all([
+          supabase.from('packages').select('*').eq('availability', true).order('is_featured', { ascending: false }).limit(6),
+          supabase.from('testimonials').select('*').eq('is_approved', true).limit(4),
+          supabase.from('blog_posts').select('*').eq('status', 'published').limit(3),
+          supabase.from('gallery').select('*').limit(6),
+          supabase.from('information_centers').select('*').eq('status', 'published').order('created_at', { ascending: false }).limit(6),
+        ]);
+        
+        if (pkgs) setPackages(pkgs);
+        if (testi) setTestimonials(testi);
+        if (blogs) setBlogPosts(blogs);
+        if (gal) setGallery(gal);
+        if (centers) setInfoCenters(centers);
+      } catch (e) {
+        console.error('Error loading homepage data:', e);
+      }
+    };
+    
+    testConnection();
     fetchData();
   }, []);
 
@@ -53,19 +74,58 @@ const Index = () => {
     ? packages
     : packages.filter(p => p.category === activeCategory);
 
+  const heroType = settings.hero_background_type || 'image';
+  const sliderImages = settings.hero_slider_images && settings.hero_slider_images.length
+    ? settings.hero_slider_images
+    : (settings.hero_background_image ? [settings.hero_background_image] : []);
+  const [sliderIndex, setSliderIndex] = useState(0);
+  const replayVideo = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const v = e.currentTarget;
+    v.currentTime = 0;
+    v.play?.();
+  }, []);
+
+  useEffect(() => {
+    if (heroType !== 'slider' || sliderImages.length <= 1) return;
+    const id = setInterval(() => setSliderIndex(i => (i + 1) % sliderImages.length), 5000);
+    return () => clearInterval(id);
+  }, [heroType, sliderImages.length]);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[100dvh] min-h-screen w-full flex items-center justify-center overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt="Rwanda landscape"
-            className="w-full h-full object-cover"
-          />
+        <div className="absolute inset-0 w-full h-full min-h-[100dvh]">
+          {heroType === 'video' && settings.hero_background_video ? (
+            <video
+              className="absolute inset-0 w-full h-full min-w-full min-h-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              onEnded={replayVideo}
+            >
+              <source src={settings.hero_background_video} type="video/mp4" />
+            </video>
+          ) : heroType === 'slider' && sliderImages.length > 0 ? (
+            sliderImages.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt=""
+                className={`absolute inset-0 w-full h-full min-w-full min-h-full object-cover transition-opacity duration-700 ${i === sliderIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              />
+            ))
+          ) : (
+            <img
+              src={sliderImages[0] || settings.hero_background_image || heroImage}
+              alt="Rwanda landscape"
+              className="absolute inset-0 w-full h-full min-w-full min-h-full object-cover"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-hero" />
         </div>
 
@@ -92,7 +152,7 @@ const Index = () => {
           </div>
 
           <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-            {t('hero.title').split(' ').map((word, i) => (
+            {(settings.hero_title || t('hero.title')).split(' ').map((word, i) => (
               <span key={i} className={i >= 1 && i <= 2 ? 'text-gradient-gold' : ''}>
                 {word}{' '}
               </span>
@@ -100,7 +160,7 @@ const Index = () => {
           </h1>
 
           <p className="font-body text-lg md:text-xl text-white/75 max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-up" style={{ animationDelay: '0.2s' }}>
-            Experience the Land of a Thousand Hills — from gorilla trekking in Volcanoes National Park to the shores of Lake Kivu. Your extraordinary African journey begins here.
+            {settings.hero_subtitle || settings.hero_description || 'Experience the Land of a Thousand Hills — from gorilla trekking in Volcanoes National Park to the shores of Lake Kivu. Your extraordinary African journey begins here.'}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style={{ animationDelay: '0.3s' }}>
@@ -109,8 +169,8 @@ const Index = () => {
               size="lg"
               className="bg-gradient-gold text-navy font-semibold text-base px-8 py-4 h-auto border-0 shadow-gold hover:opacity-90 font-body"
             >
-              <Link to="/packages">
-                {t('hero.cta')} <ArrowRight className="ml-2 w-5 h-5" />
+              <Link to={settings.hero_button_link || '/packages'}>
+                {settings.hero_button_text || t('hero.cta')} <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
             </Button>
             <Button
@@ -197,11 +257,17 @@ const Index = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(filteredPackages.length > 0 ? filteredPackages : packages).map((pkg) => (
-              <PackageCard key={pkg.id} pkg={pkg} t={t} />
-            ))}
-          </div>
+          {packages.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(filteredPackages.length > 0 ? filteredPackages : packages).map((pkg) => (
+                <PackageCard key={pkg.id} pkg={pkg} t={t} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="font-body text-muted-foreground">No packages available at the moment. Check back soon!</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -250,26 +316,32 @@ const Index = () => {
               View Full Gallery <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {gallery.slice(0, 6).map((item, i) => (
-              <div
-                key={item.id}
-                className={`relative overflow-hidden rounded-2xl group cursor-pointer ${
-                  i === 0 ? 'md:row-span-2' : ''
-                }`}
-                style={{ height: i === 0 ? '400px' : '188px' }}
-              >
-                <img
-                  src={item.media_url}
-                  alt={item.title || 'Gallery'}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-hero opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <span className="font-body text-white font-medium text-sm">{item.title}</span>
+          {gallery.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {gallery.slice(0, 6).map((item, i) => (
+                <div
+                  key={item.id}
+                  className={`relative overflow-hidden rounded-2xl group cursor-pointer ${
+                    i === 0 ? 'md:row-span-2' : ''
+                  }`}
+                  style={{ height: i === 0 ? '400px' : '188px' }}
+                >
+                  <img
+                    src={item.media_url}
+                    alt={item.title || 'Gallery'}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-hero opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                    <span className="font-body text-white font-medium text-sm">{item.title}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="font-body text-muted-foreground">Gallery images coming soon!</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -286,40 +358,110 @@ const Index = () => {
               View All Articles <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {blogPosts.map((post) => (
-              <article key={post.id} className="bg-card rounded-2xl overflow-hidden shadow-card hover-lift group">
-                {post.cover_image && (
-                  <div className="h-48 overflow-hidden">
-                    <img
-                      src={post.cover_image}
-                      alt={post.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                )}
-                <div className="p-5">
-                  {post.category && (
-                    <Badge className="bg-accent/15 text-accent border-0 font-body text-xs mb-3">
-                      {post.category}
-                    </Badge>
+          {blogPosts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {blogPosts.map((post) => (
+                <article key={post.id} className="bg-card rounded-2xl overflow-hidden shadow-card hover-lift group">
+                  {post.cover_image && (
+                    <div className="h-48 overflow-hidden">
+                      <img
+                        src={post.cover_image}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
                   )}
-                  <h3 className="font-display text-lg font-semibold text-foreground mb-2 leading-snug">
-                    {post.title}
-                  </h3>
-                  <p className="font-body text-sm text-muted-foreground mb-4 line-clamp-2">{post.excerpt}</p>
-                  <Link
-                    to={`/blog/${post.slug}`}
-                    className="inline-flex items-center gap-1 text-primary hover:text-accent font-body text-sm font-medium transition-colors"
-                  >
-                    Read More <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
+                  <div className="p-5">
+                    {post.category && (
+                      <Badge className="bg-accent/15 text-accent border-0 font-body text-xs mb-3">
+                        {post.category}
+                      </Badge>
+                    )}
+                    <h3 className="font-display text-lg font-semibold text-foreground mb-2 leading-snug">
+                      {post.title}
+                    </h3>
+                    <p className="font-body text-sm text-muted-foreground mb-4 line-clamp-2">{post.excerpt}</p>
+                    <Link
+                      to={`/blog/${post.slug}`}
+                      className="inline-flex items-center gap-1 text-primary hover:text-accent font-body text-sm font-medium transition-colors"
+                    >
+                      Read More <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="font-body text-muted-foreground">Blog posts coming soon!</p>
+            </div>
+          )}
         </div>
       </section>
+
+      {/* Information Centers Section */}
+      {infoCenters.length > 0 && (
+        <section className="section-padding">
+          <div className="container-max mx-auto">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+              <div>
+                <div className="gold-divider mb-4" />
+                <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">Information Centers</h2>
+                <p className="font-body text-muted-foreground">Discover tourist information centers across Rwanda</p>
+              </div>
+              <Link to="/information-centers" className="text-primary hover:text-accent font-body text-sm font-medium flex items-center gap-1 transition-colors shrink-0">
+                View All Centers <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {infoCenters.slice(0, 6).map((center) => (
+                <div key={center.id} className="bg-card rounded-2xl overflow-hidden shadow-card hover-lift group">
+                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
+                    {center.latitude && center.longitude ? (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <MapPin className="w-16 h-16 text-primary/40" />
+                      </div>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <MapPin className="w-16 h-16 text-primary/40" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-display text-lg font-semibold text-foreground mb-2 leading-snug">
+                      {center.name}
+                    </h3>
+                    {center.description && (
+                      <p className="font-body text-sm text-muted-foreground mb-4 line-clamp-2">{center.description}</p>
+                    )}
+                    {center.address && (
+                      <div className="flex items-start gap-2 mb-4">
+                        <MapPin className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                        <p className="font-body text-xs text-muted-foreground">{center.address}</p>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <Button asChild size="sm" className="bg-gradient-navy text-white hover:opacity-90 border-0 font-body flex-1">
+                        <Link to={`/information-centers/${center.id}`}>View Details</Link>
+                      </Button>
+                      {center.latitude && center.longitude && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="font-body"
+                          onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${center.latitude},${center.longitude}`, '_blank')}
+                        >
+                          <Navigation className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="section-padding relative overflow-hidden bg-gradient-teal">
@@ -342,6 +484,87 @@ const Index = () => {
             <Button asChild variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 px-8 font-body">
               <Link to="/internships">Apply for Internship</Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Map Section */}
+      <section className="section-padding bg-muted/30">
+        <div className="container-max mx-auto">
+          <div className="text-center mb-12">
+            <div className="gold-divider mx-auto mb-4" />
+            <h2 className="font-display text-3xl font-bold text-foreground mb-4">Find Us</h2>
+            <p className="font-body text-muted-foreground max-w-xl mx-auto">Visit our main office or explore our locations on the map</p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Interactive Map */}
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              <div className="h-96">
+                {import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? (
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                    src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=KN+4+Ave,+Kigali,+Rwanda&zoom=15`}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">Map unavailable</p>
+                    <p className="text-sm text-gray-500">KN 4 Ave, Kigali, Rwanda</p>
+                  </div>
+                )}
+              </div>
+              <div className="p-4 bg-gradient-navy">
+                <h3 className="font-display text-lg font-semibold text-white mb-2">Main Office</h3>
+                <p className="text-white/80 text-sm">{settings.address || "KN 4 Ave, Kigali, Rwanda"}</p>
+                <div className="flex items-center gap-4 text-white/60 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    <span>{settings.contact_phone || "+250 788 123 456"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    <span>{settings.contact_email || "info@kigalihub.com"}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Info Card */}
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="font-display text-lg font-semibold text-foreground mb-4">Get Directions</h3>
+              <p className="font-body text-muted-foreground mb-4">Click below to get directions to our office via Google Maps</p>
+              <div className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => window.open('https://www.google.com/maps/dir/?api=1&destination=KN+4+Ave,+Kigali,+Rwanda', '_blank')}
+                >
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Open in Google Maps
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => window.open(`tel:${settings.contact_phone || '+250788123456'}`, '_blank')}
+                >
+                  <Phone className="h-4 w-4 mr-2" />
+                  Call Us
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => window.open(`mailto:${settings.contact_email || 'info@kigalihub.com'}`, '_blank')}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Email Us
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -15,6 +16,7 @@ import Footer from '@/components/Footer';
 const PackageDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const { settings } = useSettings();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [pkg, setPkg] = useState<any>(null);
@@ -43,25 +45,33 @@ const PackageDetail = () => {
     if (id) fetchData();
   }, [id, user]);
 
+  const confirmationFee = settings.booking_confirmation_fee || 0;
+
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) { navigate('/auth'); return; }
     setSubmitting(true);
     const price = pkg.discount > 0 ? Math.round(pkg.price * (1 - pkg.discount / 100)) : pkg.price;
+    const packageTotal = price * booking.num_travelers;
+    const totalAmount = packageTotal + confirmationFee;
     const { error } = await supabase.from('bookings').insert({
       client_id: user.id,
       package_id: id,
       travel_date: booking.travel_date,
       num_travelers: booking.num_travelers,
-      total_amount: price * booking.num_travelers,
+      total_amount: totalAmount,
       notes: booking.notes,
-      status: 'pending',
+      status: confirmationFee > 0 ? 'pending_payment' : 'pending',
     });
     setSubmitting(false);
     if (error) {
       toast({ title: 'Booking failed', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Booking submitted!', description: 'We will confirm your booking shortly.' });
+      if (confirmationFee > 0) {
+        toast({ title: 'Booking created!', description: `Pay $${confirmationFee} confirmation fee to complete your booking.` });
+      } else {
+        toast({ title: 'Booking submitted!', description: 'We will confirm your booking shortly.' });
+      }
       setBooking({ travel_date: '', num_travelers: 1, notes: '' });
     }
   };
@@ -200,14 +210,23 @@ const PackageDetail = () => {
                       <span>${finalPrice} × {booking.num_travelers} traveler{booking.num_travelers > 1 ? 's' : ''}</span>
                       <span className="font-semibold text-foreground">${finalPrice * booking.num_travelers}</span>
                     </div>
+                    {confirmationFee > 0 && (
+                      <div className="flex justify-between font-body text-sm text-muted-foreground mb-1">
+                        <span>Booking confirmation fee</span>
+                        <span className="font-semibold text-foreground">${confirmationFee}</span>
+                      </div>
+                    )}
                     <div className="border-t border-border pt-2 mt-2 flex justify-between">
                       <span className="font-body font-semibold text-foreground">Total</span>
-                      <span className="font-display text-xl font-bold text-accent">${finalPrice * booking.num_travelers}</span>
+                      <span className="font-display text-xl font-bold text-accent">${(finalPrice * booking.num_travelers) + confirmationFee}</span>
                     </div>
+                    {confirmationFee > 0 && (
+                      <p className="font-body text-xs text-muted-foreground mt-2">Confirmation fee required to secure your booking</p>
+                    )}
                   </div>
 
                   <Button type="submit" disabled={submitting} className="w-full bg-gradient-gold text-navy font-semibold border-0 shadow-gold hover:opacity-90 font-body h-12">
-                    {submitting ? 'Submitting...' : user ? 'Book Now' : 'Sign in to Book'}
+                    {submitting ? 'Submitting...' : user ? (confirmationFee > 0 ? `Book Now (Pay $${confirmationFee} to confirm)` : 'Book Now') : 'Sign in to Book'}
                   </Button>
                 </form>
               </div>

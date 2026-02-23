@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Globe, ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +17,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { user, role, signOut } = useAuth();
+  const { settings } = useSettings();
   const { language, setLanguage, t, languageOptions } = useLanguage();
   const navigate = useNavigate();
 
@@ -29,7 +31,8 @@ const Navbar = () => {
     if (role === 'admin') return '/admin';
     if (role === 'tour_manager') return '/manager';
     if (role === 'accountant') return '/accountant';
-    return '/client';
+    if (role === 'client') return '/client';
+    return '/dashboard';
   };
 
   const navLinks = [
@@ -38,6 +41,8 @@ const Navbar = () => {
     { href: '/gallery', label: t('nav.gallery') },
     { href: '/blog', label: t('nav.blog') },
     { href: '/internships', label: t('nav.internships') },
+    { href: '/information-centers', label: 'Information Centers' },
+    { href: '/contact', label: t('nav.contact') },
     { href: '/info', label: t('nav.info') },
   ];
 
@@ -53,11 +58,15 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-gradient-gold rounded-xl flex items-center justify-center shadow-gold group-hover:scale-105 transition-transform">
-              <span className="text-navy font-display font-bold text-lg">E</span>
-            </div>
+            {settings.system_logo ? (
+              <img src={settings.system_logo} alt={settings.system_name} className="h-10 w-auto object-contain" />
+            ) : (
+              <div className="w-10 h-10 bg-gradient-gold rounded-xl flex items-center justify-center shadow-gold group-hover:scale-105 transition-transform">
+                <span className="text-navy font-display font-bold text-lg">E</span>
+              </div>
+            )}
             <div>
-              <span className="text-white font-display font-bold text-xl tracking-wide">ESA Tours</span>
+              <span className="text-white font-display font-bold text-xl tracking-wide">{settings.system_name}</span>
               <div className="text-gold text-xs font-body tracking-widest uppercase opacity-80">Kigali • Rwanda</div>
             </div>
           </Link>
@@ -111,6 +120,10 @@ const Navbar = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => { navigate('/profile'); }} className="font-body">
+                    <User className="w-4 h-4 mr-2" />
+                    My Profile
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate(getDashboardPath())} className="font-body">
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     {t('dashboard')}
@@ -170,6 +183,9 @@ const Navbar = () => {
             <div className="border-t border-white/10 mt-2 pt-2 flex flex-col gap-2">
               {user ? (
                 <>
+                  <Button variant="ghost" onClick={() => { navigate('/profile'); setIsMobileOpen(false); }} className="text-white justify-start font-body">
+                    <User className="w-4 h-4 mr-2" /> My Profile
+                  </Button>
                   <Button variant="ghost" onClick={() => { navigate(getDashboardPath()); setIsMobileOpen(false); }} className="text-white justify-start font-body">
                     <LayoutDashboard className="w-4 h-4 mr-2" /> {t('dashboard')}
                   </Button>

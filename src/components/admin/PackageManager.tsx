@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeForDb } from '@/lib/sanitize';
 
 const categories = ['Wildlife', 'Cultural', 'Adventure', 'Safari', 'Beach & Lake'];
 
@@ -56,7 +57,19 @@ const PackageManager = () => {
   const handleSave = async () => {
     if (!form.title) { toast({ title: 'Title is required', variant: 'destructive' }); return; }
     setSaving(true);
-    const payload = { title: form.title, description: form.description, location: form.location, duration: form.duration, price: form.price, discount: form.discount, category: form.category, availability: form.availability, is_featured: form.is_featured, features: form.features, images: form.images };
+    const payload = {
+      title: sanitizeForDb(form.title),
+      description: sanitizeForDb(form.description || ''),
+      location: sanitizeForDb(form.location || ''),
+      duration: sanitizeForDb(form.duration || ''),
+      price: form.price,
+      discount: form.discount,
+      category: sanitizeForDb(form.category || ''),
+      availability: form.availability,
+      is_featured: form.is_featured,
+      features: form.features.map(f => sanitizeForDb(f)),
+      images: form.images
+    };
 
     if (editing) {
       const { error } = await supabase.from('packages').update(payload).eq('id', editing.id);

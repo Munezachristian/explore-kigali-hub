@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FileText, Upload, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { FileText, Upload, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,12 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const Internships = () => {
   const { user } = useAuth();
+  const { settings } = useSettings();
   const { toast } = useToast();
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', university: '', type: '', cover_letter: '' });
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -77,8 +80,18 @@ const Internships = () => {
 
       <section className="section-padding">
         <div className="container-max mx-auto">
+          {!settings.internship_open ? (
+            <div className="text-center py-16">
+              <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+              <h2 className="font-display text-2xl font-bold text-foreground mb-2">Internships Currently Closed</h2>
+              <p className="font-body text-muted-foreground max-w-md mx-auto">We are not accepting internship applications at this time. Please check back later for updates.</p>
+              <Button asChild variant="outline" className="mt-6 font-body">
+                <Link to="/">Return Home</Link>
+              </Button>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Info cards */}
+            {/* Info cards - Benefits from admin settings */}
             <div className="space-y-4">
               {[
                 { title: 'Student Internship', desc: 'For university students seeking practical experience in tourism management, operations, and hospitality.', icon: '🎓' },
@@ -90,6 +103,25 @@ const Internships = () => {
                   <p className="font-body text-sm text-muted-foreground">{item.desc}</p>
                 </div>
               ))}
+              {settings.internship_price > 0 && (
+                <div className="bg-accent/10 rounded-2xl p-6 border border-accent/20">
+                  <h4 className="font-display text-base font-semibold text-foreground mb-2">Program Fee</h4>
+                  <p className="font-body text-lg font-bold text-accent">${settings.internship_price} <span className="text-sm font-normal text-muted-foreground">one-time</span></p>
+                </div>
+              )}
+              {settings.internship_price === 0 && (
+                <div className="bg-emerald-500/10 rounded-2xl p-6 border border-emerald-500/20">
+                  <h4 className="font-display text-base font-semibold text-foreground mb-2">Program Fee</h4>
+                  <p className="font-body text-lg font-bold text-emerald-600">Free</p>
+                  <p className="font-body text-sm text-muted-foreground mt-1">No cost to apply</p>
+                </div>
+              )}
+              <div className="bg-muted/50 rounded-2xl p-6">
+                <h4 className="font-display text-base font-semibold text-foreground mb-3">Why Apply? Benefits</h4>
+                <div className="font-body text-sm text-muted-foreground whitespace-pre-line">
+                  {settings.internship_benefits || '• Hands-on experience in tourism industry\n• Mentorship from industry professionals\n• Certificate upon completion\n• Networking opportunities'}
+                </div>
+              </div>
               <div className="bg-muted/50 rounded-2xl p-6">
                 <h4 className="font-display text-base font-semibold text-foreground mb-3">Application Process</h4>
                 {['Submit your application', 'Team reviews within 5 days', 'Interview invitation', 'Offer & onboarding'].map((step, i) => (
@@ -156,6 +188,7 @@ const Internships = () => {
               </div>
             </div>
           </div>
+          )}
         </div>
       </section>
 

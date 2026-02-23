@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Package, CalendarCheck, FileText, MessageSquare, Settings, LogOut,
-  TrendingUp, Clock, Star, ChevronRight, Menu, X, Users, BookOpen,
-  Image, Bell, LayoutDashboard, DollarSign, Activity
+  TrendingUp, Star, Menu, X, Users, BookOpen,
+  Image, Bell, LayoutDashboard, DollarSign, MapPin, Megaphone
 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { DashboardLanguageSwitch } from '@/components/DashboardLanguageSwitch';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +18,15 @@ import PackageManager from '@/components/admin/PackageManager';
 import UserRoleManager from '@/components/admin/UserRoleManager';
 import BlogEditor from '@/components/admin/BlogEditor';
 import GalleryManager from '@/components/admin/GalleryManager';
+import BookingsManager from '@/components/admin/BookingsManager';
+import TestimonialsManager from '@/components/admin/TestimonialsManager';
+import InternshipsManager from '@/components/admin/InternshipsManager';
+import InfoCenterManager from '@/components/admin/InfoCenterManager';
+import InformationCentersManager from '@/components/admin/InformationCentersManager';
+import SystemLogs from '@/components/admin/SystemLogs';
+import SettingsManager from '@/components/admin/Settings';
+import FinancialManager from '@/components/admin/FinancialManager';
+import AdvertisementsManager from '@/components/admin/AdvertisementsManager';
 
 interface Stats {
   packages: number;
@@ -37,25 +50,17 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-const SectionPlaceholder = ({ section }: { section: string }) => (
-  <div className="bg-card rounded-2xl shadow-card p-12 text-center">
-    <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
-      <Settings className="w-8 h-8 text-muted-foreground" />
-    </div>
-    <h3 className="font-display text-xl font-semibold text-foreground mb-2 capitalize">{section.replace('-', ' ')} Module</h3>
-    <p className="font-body text-muted-foreground text-sm max-w-sm mx-auto">
-      This module is ready for your content. Full CRUD functionality will be available here.
-    </p>
-  </div>
-);
-
 const AdminDashboard = () => {
   const { user, role, signOut } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({ packages: 0, bookings: 0, revenue: 0, internships: 0, testimonials: 0 });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
+  const [bookingChartData, setBookingChartData] = useState<any[]>([]);
+  const [revenueChartData, setRevenueChartData] = useState<any[]>([]);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     if (!user || role !== 'admin') {
@@ -66,30 +71,59 @@ const AdminDashboard = () => {
   }, [user, role, navigate]);
 
   const fetchStats = async () => {
-    const [{ count: pkgCount }, { count: bkCount }, { data: payments }, { count: intCount }, { count: testiCount }] = await Promise.all([
-      supabase.from('packages').select('*', { count: 'exact', head: true }),
-      supabase.from('bookings').select('*', { count: 'exact', head: true }),
-      supabase.from('payments').select('amount').eq('status', 'confirmed'),
-      supabase.from('internships').select('*', { count: 'exact', head: true }),
-      supabase.from('testimonials').select('*', { count: 'exact', head: true }).eq('is_approved', false),
-    ]);
-    const revenue = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-    setStats({ packages: pkgCount || 0, bookings: bkCount || 0, revenue, internships: intCount || 0, testimonials: testiCount || 0 });
+    try {
+      setStatsLoading(true);
+      const [{ count: pkgCount }, { count: bkCount }, { data: payments }, { count: intCount }, { count: testiCount }] = await Promise.all([
+        supabase.from('packages').select('*', { count: 'exact', head: true }),
+        supabase.from('bookings').select('*', { count: 'exact', head: true }),
+        supabase.from('payments').select('amount, created_at').eq('status', 'confirmed'),
+        supabase.from('internships').select('*', { count: 'exact', head: true }),
+        supabase.from('testimonials').select('*', { count: 'exact', head: true }).eq('is_approved', false),
+      ]);
+      const revenue = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+      setStats({ packages: pkgCount || 0, bookings: bkCount || 0, revenue, internships: intCount || 0, testimonials: testiCount || 0 });
 
-    const { data: bks } = await supabase.from('bookings').select('*, packages(title)').order('created_at', { ascending: false }).limit(5);
-    if (bks) setRecentBookings(bks);
+      const { data: bks } = await supabase.from('bookings').select('*, packages(title)').order('created_at', { ascending: false }).limit(5);
+      if (bks) setRecentBookings(bks);
+
+      const { data: allBookings } = await supabase.from('bookings').select('created_at').order('created_at', { ascending: false }).limit(200);
+      if (allBookings?.length) {
+        const byMonth: Record<string, number> = {};
+        allBookings.forEach((b: any) => {
+          const m = new Date(b.created_at).toLocaleString('default', { month: 'short', year: '2-digit' });
+          byMonth[m] = (byMonth[m] || 0) + 1;
+        });
+        setBookingChartData(Object.entries(byMonth).map(([name, count]) => ({ name, count })));
+      }
+
+      if (payments?.length) {
+        const byMonth: Record<string, number> = {};
+        payments.forEach((p: any) => {
+          const m = new Date(p.created_at).toLocaleString('default', { month: 'short', year: '2-digit' });
+          byMonth[m] = (byMonth[m] || 0) + (p.amount || 0);
+        });
+        setRevenueChartData(Object.entries(byMonth).map(([name, revenue]) => ({ name, revenue })));
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+    } finally {
+      setStatsLoading(false);
+    }
   };
 
   const navItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'packages', icon: Package, label: 'Packages' },
     { id: 'bookings', icon: CalendarCheck, label: 'Bookings' },
+    { id: 'financial', icon: DollarSign, label: 'Financial' },
     { id: 'users', icon: Users, label: 'Users & Roles' },
     { id: 'blog', icon: BookOpen, label: 'Blog' },
     { id: 'gallery', icon: Image, label: 'Gallery' },
     { id: 'testimonials', icon: Star, label: 'Testimonials', badge: stats.testimonials },
     { id: 'internships', icon: FileText, label: 'Internships', badge: stats.internships },
     { id: 'info', icon: MessageSquare, label: 'Info Center' },
+    { id: 'information-centers', icon: MapPin, label: 'Information Centers' },
+    { id: 'advertisements', icon: Megaphone, label: 'Advertisements' },
     { id: 'logs', icon: Bell, label: 'System Logs' },
     { id: 'settings', icon: Settings, label: 'Settings' },
   ];
@@ -99,12 +133,6 @@ const AdminDashboard = () => {
     { label: 'Total Bookings', value: stats.bookings, icon: CalendarCheck, gradient: 'bg-gradient-to-br from-blue-500 to-indigo-600', sub: 'All time' },
     { label: 'Tour Packages', value: stats.packages, icon: Package, gradient: 'bg-gradient-to-br from-amber-500 to-orange-600', sub: 'Active listings' },
     { label: 'Pending Reviews', value: stats.testimonials, icon: Star, gradient: 'bg-gradient-to-br from-purple-500 to-violet-600', sub: 'Awaiting approval' },
-  ];
-
-  const quickActions = [
-    { label: 'Add New Package', icon: Package, section: 'packages', gradient: 'bg-gradient-to-br from-amber-500 to-orange-600' },
-    { label: 'Review Testimonials', icon: Star, section: 'testimonials', gradient: 'bg-gradient-to-br from-purple-500 to-violet-600' },
-    { label: 'View System Logs', icon: Bell, section: 'logs', gradient: 'bg-gradient-to-br from-blue-500 to-indigo-600' },
   ];
 
   return (
@@ -172,7 +200,7 @@ const AdminDashboard = () => {
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:text-red-400 hover:bg-red-400/10 transition-colors font-body text-sm"
           >
             <LogOut className="w-4 h-4" />
-            Sign Out
+            {t('dash.signOut')}
           </button>
         </div>
       </aside>
@@ -196,8 +224,10 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <DashboardLanguageSwitch />
+            <ThemeToggle />
             <Button asChild variant="outline" size="sm" className="font-body text-xs hidden sm:flex">
-              <Link to="/">← View Site</Link>
+              <Link to="/">← {t('dash.viewSite')}</Link>
             </Button>
           </div>
         </header>
@@ -206,87 +236,115 @@ const AdminDashboard = () => {
         <div className="p-6">
           {activeSection === 'dashboard' && (
             <div className="space-y-6">
-              {/* Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                {statCards.map(({ label, value, icon: Icon, gradient, sub }) => (
-                  <div key={label} className="bg-card rounded-2xl p-5 shadow-card">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className={`w-11 h-11 rounded-xl ${gradient} flex items-center justify-center shadow-md`}>
-                        <Icon className="w-5 h-5 text-white" />
+              {statsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
+                  <span className="text-muted-foreground">Loading dashboard data...</span>
+                </div>
+              ) : (
+                <>
+                  {/* Stats */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                    {statCards.map(({ label, value, icon: Icon, gradient, sub }) => (
+                      <div key={label} className="bg-card rounded-2xl p-5 shadow-card">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className={`w-11 h-11 rounded-xl ${gradient} flex items-center justify-center shadow-md`}>
+                            <Icon className="w-5 h-5 text-white" />
+                          </div>
+                          <TrendingUp className="w-4 h-4 text-emerald-500" />
+                        </div>
+                        <div className="font-display text-2xl font-bold text-foreground mb-0.5">{value}</div>
+                        <div className="font-body text-sm font-medium text-foreground">{label}</div>
+                        <div className="font-body text-xs text-muted-foreground mt-0.5">{sub}</div>
                       </div>
-                      <TrendingUp className="w-4 h-4 text-emerald-500" />
-                    </div>
-                    <div className="font-display text-2xl font-bold text-foreground mb-0.5">{value}</div>
-                    <div className="font-body text-sm font-medium text-foreground">{label}</div>
-                    <div className="font-body text-xs text-muted-foreground mt-0.5">{sub}</div>
+                    ))}
                   </div>
-                ))}
-              </div>
 
-              {/* Recent bookings */}
-              <div className="bg-card rounded-2xl shadow-card overflow-hidden">
-                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-                  <h2 className="font-display font-semibold text-foreground">Recent Bookings</h2>
-                  <button onClick={() => setActiveSection('bookings')} className="text-xs text-primary hover:text-accent font-body flex items-center gap-1">
-                    View All <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        {['Package', 'Travelers', 'Amount', 'Status', 'Date'].map(h => (
-                          <th key={h} className="text-left px-5 py-3 font-body text-xs font-semibold text-muted-foreground uppercase tracking-wide">{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {recentBookings.length === 0 ? (
-                        <tr><td colSpan={5} className="text-center py-8 text-muted-foreground font-body text-sm">No bookings yet</td></tr>
-                      ) : recentBookings.map(b => (
-                        <tr key={b.id} className="hover:bg-muted/30 transition-colors">
-                          <td className="px-5 py-3.5 font-body text-sm text-foreground font-medium">{(b.packages as any)?.title || 'N/A'}</td>
-                          <td className="px-5 py-3.5 font-body text-sm text-muted-foreground">{b.num_travelers}</td>
-                          <td className="px-5 py-3.5 font-body text-sm font-semibold text-foreground">${b.total_amount || 0}</td>
-                          <td className="px-5 py-3.5">
-                            <StatusBadge status={b.status} />
-                          </td>
-                          <td className="px-5 py-3.5 font-body text-sm text-muted-foreground">
-                            {new Date(b.created_at).toLocaleDateString()}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Quick actions */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {quickActions.map(({ label, icon: Icon, section, gradient }) => (
-                  <button
-                    key={label}
-                    onClick={() => setActiveSection(section)}
-                    className="bg-card rounded-xl p-4 shadow-card hover-lift flex items-center gap-3 text-left"
-                  >
-                    <div className={`w-10 h-10 ${gradient} rounded-xl flex items-center justify-center`}>
-                      <Icon className="w-5 h-5 text-white" />
+                  {/* Charts */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Bookings Chart */}
+                    <div className="bg-card rounded-2xl shadow-card p-6">
+                      <h3 className="font-display text-lg font-semibold text-foreground mb-4">Bookings Over Time</h3>
+                      {bookingChartData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={220}>
+                          <BarChart data={bookingChartData}>
+                            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                            <YAxis tick={{ fontSize: 12 }} />
+                            <Tooltip />
+                            <Bar dataKey="count" fill="hsl(175,55%,28%)" radius={[6, 6, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <p className="text-muted-foreground font-body text-sm text-center py-8">No booking data yet</p>
+                      )}
                     </div>
-                    <span className="font-body text-sm font-semibold text-foreground">{label}</span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
-                  </button>
-                ))}
-              </div>
+
+                    {/* Revenue Chart */}
+                    <div className="bg-card rounded-2xl shadow-card p-6">
+                      <h3 className="font-display text-lg font-semibold text-foreground mb-4">Revenue Over Time</h3>
+                      {revenueChartData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={220}>
+                          <BarChart data={revenueChartData}>
+                            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                            <YAxis tick={{ fontSize: 12 }} />
+                            <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']} />
+                            <Bar dataKey="revenue" fill="hsl(45,93%,47%)" radius={[6, 6, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <p className="text-muted-foreground font-body text-sm text-center py-8">No revenue data yet</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Recent Bookings */}
+                  {recentBookings.length > 0 && (
+                    <div className="bg-card rounded-2xl shadow-card p-6">
+                      <h3 className="font-display text-lg font-semibold text-foreground mb-4">Recent Bookings</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm font-body">
+                          <thead>
+                            <tr className="border-b border-border">
+                              <th className="text-left py-2 px-3 text-muted-foreground font-medium">Package</th>
+                              <th className="text-left py-2 px-3 text-muted-foreground font-medium">Status</th>
+                              <th className="text-left py-2 px-3 text-muted-foreground font-medium">Date</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {recentBookings.map((booking) => (
+                              <tr key={booking.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                                <td className="py-2.5 px-3 text-foreground">{booking.packages?.title ?? 'N/A'}</td>
+                                <td className="py-2.5 px-3">
+                                  <StatusBadge status={booking.status} />
+                                </td>
+                                <td className="py-2.5 px-3 text-muted-foreground">
+                                  {new Date(booking.created_at).toLocaleDateString()}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
           {activeSection === 'packages' && <PackageManager />}
+          {activeSection === 'bookings' && <BookingsManager />}
+          {activeSection === 'financial' && <FinancialManager />}
           {activeSection === 'users' && <UserRoleManager />}
           {activeSection === 'blog' && <BlogEditor />}
           {activeSection === 'gallery' && <GalleryManager />}
-          {!['dashboard', 'packages', 'users', 'blog', 'gallery'].includes(activeSection) && (
-            <SectionPlaceholder section={activeSection} />
-          )}
+          {activeSection === 'testimonials' && <TestimonialsManager />}
+          {activeSection === 'internships' && <InternshipsManager />}
+          {activeSection === 'info' && <InfoCenterManager />}
+          {activeSection === 'information-centers' && <InformationCentersManager />}
+          {activeSection === 'advertisements' && <AdvertisementsManager />}
+          {activeSection === 'logs' && <SystemLogs />}
+          {activeSection === 'settings' && <SettingsManager />}
         </div>
       </main>
     </div>
@@ -294,3 +352,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

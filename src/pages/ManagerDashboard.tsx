@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Package, CalendarCheck, FileText, LogOut, LayoutDashboard, BookOpen, Image, Users, ChevronRight, TrendingUp, Clock, Menu, X, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { DashboardLanguageSwitch } from '@/components/DashboardLanguageSwitch';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const SectionPlaceholder = ({ section }: { section: string }) => (
   <div className="bg-card rounded-2xl shadow-card p-12 text-center">
@@ -19,10 +22,13 @@ const SectionPlaceholder = ({ section }: { section: string }) => (
 
 const ManagerDashboard = () => {
   const { user, role, signOut } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [stats, setStats] = useState({ packages: 0, pendingBookings: 0, pendingInternships: 0, activePackages: 0 });
+  const [bookingChartData, setBookingChartData] = useState<any[]>([]);
+  const [statusChartData, setStatusChartData] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user || role !== 'tour_manager') {
@@ -33,13 +39,25 @@ const ManagerDashboard = () => {
   }, [user, role, navigate]);
 
   const fetchStats = async () => {
-    const [{ count: pkgCount }, { count: pendingBk }, { count: intCount }, { count: activePkg }] = await Promise.all([
+    const [{ count: pkgCount }, { count: pendingBk }, { count: intCount }, { count: activePkg }, { data: allBookings }] = await Promise.all([
       supabase.from('packages').select('*', { count: 'exact', head: true }),
       supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('internships').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('packages').select('*', { count: 'exact', head: true }).eq('availability', true),
+      supabase.from('bookings').select('created_at, status').order('created_at', { ascending: false }).limit(200),
     ]);
     setStats({ packages: pkgCount || 0, pendingBookings: pendingBk || 0, pendingInternships: intCount || 0, activePackages: activePkg || 0 });
+    if (allBookings?.length) {
+      const byMonth: Record<string, number> = {};
+      allBookings.forEach((b: any) => {
+        const m = new Date(b.created_at).toLocaleString('default', { month: 'short', year: '2-digit' });
+        byMonth[m] = (byMonth[m] || 0) + 1;
+      });
+      setBookingChartData(Object.entries(byMonth).map(([name, count]) => ({ name, count })));
+      const statusMap: Record<string, number> = {};
+      allBookings.forEach((b: any) => { statusMap[b.status] = (statusMap[b.status] || 0) + 1; });
+      setStatusChartData(Object.entries(statusMap).map(([name, value]) => ({ name, value })));
+    }
   };
 
   const navItems = [
@@ -103,7 +121,7 @@ const ManagerDashboard = () => {
         </nav>
         <div className="p-3 border-t border-white/10">
           <button onClick={signOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:text-red-400 hover:bg-red-400/10 transition-colors font-body text-sm">
-            <LogOut className="w-4 h-4" /> Sign Out
+            <LogOut className="w-4 h-4" /> {t('dash.signOut')}
           </button>
         </div>
       </aside>
@@ -121,9 +139,12 @@ const ManagerDashboard = () => {
               <p className="font-body text-muted-foreground text-xs">Tour Manager Portal</p>
             </div>
           </div>
-          <Button asChild variant="outline" size="sm" className="font-body text-xs hidden sm:flex">
-            <Link to="/">← View Site</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <DashboardLanguageSwitch />
+            <Button asChild variant="outline" size="sm" className="font-body text-xs hidden sm:flex">
+              <Link to="/">← {t('dash.viewSite')}</Link>
+            </Button>
+          </div>
         </header>
 
         <div className="p-6">
@@ -143,6 +164,38 @@ const ManagerDashboard = () => {
                     <div className="font-body text-xs text-muted-foreground mt-0.5">{sub}</div>
                   </div>
                 ))}
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-card rounded-2xl shadow-card p-6">
+                  <h3 className="font-display text-lg font-semibold text-foreground mb-4">Bookings Over Time</h3>
+                  {bookingChartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={bookingChartData}>
+                        <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip />
+                        <Bar dataKey="count" fill="hsl(175,55%,28%)" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <p className="text-muted-foreground font-body text-sm text-center py-8">No booking data yet</p>
+                  )}
+                </div>
+                <div className="bg-card rounded-2xl shadow-card p-6">
+                  <h3 className="font-display text-lg font-semibold text-foreground mb-4">Booking Status</h3>
+                  {statusChartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={220}>
+                      <PieChart>
+                        <Pie data={statusChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={({ name, value }) => `${name}: ${value}`}>
+                          {statusChartData.map((_, i) => <Cell key={i} fill={['hsl(175,55%,28%)', 'hsl(40,90%,52%)', 'hsl(215,60%,18%)', 'hsl(0,72%,51%)'][i % 4]} />)}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <p className="text-muted-foreground font-body text-sm text-center py-8">No booking data yet</p>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
