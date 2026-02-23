@@ -29,6 +29,21 @@ const translations: Translations = {
   'login': { en: 'Login', fr: 'Connexion', rw: 'Injira', sw: 'Ingia' },
   'register': { en: 'Register', fr: "S'inscrire", rw: 'Iyandikishe', sw: 'Jiandikishe' },
   'dashboard': { en: 'Dashboard', fr: 'Tableau de Bord', rw: 'Ikibaho', sw: 'Dashibodi' },
+  'dash.viewSite': { en: 'View Site', fr: 'Voir le site', rw: 'Reba urubuga', sw: 'Angalia Tovuti' },
+  'dash.signOut': { en: 'Sign Out', fr: 'Déconnexion', rw: 'Sozamo', sw: 'Ondoka' },
+  'dash.packages': { en: 'Packages', fr: 'Forfaits', rw: 'Amasezerano', sw: 'Vifurushi' },
+  'dash.bookings': { en: 'Bookings', fr: 'Réservations', rw: 'Gahunda', sw: 'Matumizi' },
+  'dash.payments': { en: 'Payments', fr: 'Paiements', rw: 'Amafaranga', sw: 'Malipo' },
+  'dash.reports': { en: 'Reports', fr: 'Rapports', rw: 'Raporisi', sw: 'Ripoti' },
+  'dash.expenses': { en: 'Expenses', fr: 'Dépenses', rw: 'Amafaranga yasohotse', sw: 'Gharama' },
+  'dash.incomes': { en: 'Incomes', fr: 'Revenus', rw: 'Amafaranga yinjira', sw: 'Mapato' },
+  'dash.salaries': { en: 'Salaries', fr: 'Salaires', rw: 'Amafaranga y\'abakozi', sw: 'Mishahara' },
+  'dash.confirmedBookings': { en: 'Confirmed Bookings', fr: 'Réservations confirmées', rw: 'Gahunda zemewe', sw: 'Matumizi yaliyothibitishwa' },
+  'dash.totalRevenue': { en: 'Total Revenue', fr: 'Revenu total', rw: 'Amafaranga yose', sw: 'Mapato yote' },
+  'dash.pendingPayments': { en: 'Pending Payments', fr: 'Paiements en attente', rw: 'Gutegereza', sw: 'Malipo yanayosubiri' },
+  'dash.recordExpense': { en: 'Record Expense', fr: 'Enregistrer dépense', rw: 'Andika igiceri', sw: 'Rekodi gharama' },
+  'dash.recordIncome': { en: 'Record Income', fr: 'Enregistrer revenu', rw: 'Andika amafaranga', sw: 'Rekodi mapato' },
+  'dash.paySalary': { en: 'Pay Salary', fr: 'Payer salaire', rw: 'Fata amafaranga', sw: 'Lipa mishahara' },
 };
 
 interface LanguageContextType {

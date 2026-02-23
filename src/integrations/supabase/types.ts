@@ -225,6 +225,92 @@ export type Database = {
         }
         Relationships: []
       }
+      information_centers: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          address: string
+          latitude: number
+          longitude: number
+          phone: string | null
+          email: string | null
+          opening_hours: string | null
+          status: 'published' | 'unpublished' | 'deleted'
+          created_at: string
+          updated_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          address: string
+          latitude: number
+          longitude: number
+          phone?: string | null
+          email?: string | null
+          opening_hours?: string | null
+          status?: 'published' | 'unpublished' | 'deleted'
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          address?: string
+          latitude?: number
+          longitude?: number
+          phone?: string | null
+          email?: string | null
+          opening_hours?: string | null
+          status?: 'published' | 'unpublished' | 'deleted'
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
+      information_center_media: {
+        Row: {
+          id: string
+          information_center_id: string
+          media_type: 'image' | 'video'
+          media_url: string
+          is_primary: boolean | null
+          display_order: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          information_center_id: string
+          media_type: 'image' | 'video'
+          media_url: string
+          is_primary?: boolean | null
+          display_order?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          information_center_id?: string
+          media_type?: 'image' | 'video'
+          media_url?: string
+          is_primary?: boolean | null
+          display_order?: number | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_information_center"
+            columns: ["information_center_id"]
+            isOneToOne: false
+            referencedRelation: "information_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       internships: {
         Row: {
           applicant_id: string | null
@@ -528,6 +614,39 @@ export type Database = {
           ip_address?: string | null
           user_id?: string | null
           user_role?: string | null
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          id: string
+          key: string
+          value: string | null
+          description: string | null
+          category: string
+          data_type: 'string' | 'number' | 'boolean' | 'json' | 'color' | 'file'
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          key: string
+          value?: string | null
+          description?: string | null
+          category?: string
+          data_type?: 'string' | 'number' | 'boolean' | 'json' | 'color' | 'file'
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          key?: string
+          value?: string | null
+          description?: string | null
+          category?: string
+          data_type?: 'string' | 'number' | 'boolean' | 'json' | 'color' | 'file'
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
