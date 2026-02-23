@@ -28,7 +28,7 @@ interface InformationCenter {
   phone: string | null;
   email: string | null;
   opening_hours: string | null;
-  status: 'published' | 'unpublished' | 'deleted';
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -36,7 +36,7 @@ interface InformationCenter {
 interface InformationCenterMedia {
   id: string;
   information_center_id: string;
-  media_type: 'image' | 'video';
+  media_type: string;
   media_url: string;
   is_primary: boolean | null;
   display_order: number | null;

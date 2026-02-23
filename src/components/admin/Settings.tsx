@@ -44,7 +44,7 @@ interface SystemSetting {
   value: string | null;
   description: string | null;
   category: string;
-  data_type: 'string' | 'number' | 'boolean' | 'json' | 'color' | 'file';
+  data_type: string;
 }
 
 const SettingsManager = () => {

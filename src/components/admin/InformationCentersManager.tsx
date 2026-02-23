@@ -116,8 +116,8 @@ const InformationCentersManager = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      setCenters(data || []);
-      setFilteredCenters(data || []);
+      setCenters((data || []) as unknown as InformationCenter[]);
+      setFilteredCenters((data || []) as unknown as InformationCenter[]);
     } catch (error: any) {
       console.error('Error fetching centers:', error);
       toast({
@@ -139,7 +139,7 @@ const InformationCentersManager = () => {
         .order('display_order', { ascending: true });
       
       if (error) throw error;
-      setMediaFiles(data || []);
+      setMediaFiles((data || []) as unknown as InformationCenterMedia[]);
     } catch (error: any) {
       console.error('Error fetching media:', error);
     }
@@ -247,7 +247,7 @@ const InformationCentersManager = () => {
       if (newMediaUrls.length > 0) {
         const mediaToInsert = newMediaUrls.map((url, index) => ({
           information_center_id: centerId,
-          media_type: url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com') ? 'video' : 'image',
+          media_type: (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com') ? 'video' : 'image') as 'image' | 'video',
           media_url: url,
           is_primary: index === 0,
           display_order: index,

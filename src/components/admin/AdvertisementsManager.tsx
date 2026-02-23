@@ -59,12 +59,12 @@ const AdvertisementsManager = () => {
   const fetchList = async () => {
     try {
       const { data, error } = await supabase
-        .from('advertisements')
+        .from('advertisements' as any)
         .select('*')
         .order('display_order', { ascending: true })
         .order('created_at', { ascending: false });
       if (error) throw error;
-      setList(data || []);
+      setList((data as unknown as Advertisement[]) || []);
     } catch (e) {
       console.error(e);
       toast({ title: 'Error loading advertisements', variant: 'destructive' });
@@ -111,11 +111,11 @@ const AdvertisementsManager = () => {
         display_order: form.display_order,
       };
       if (editing) {
-        const { error } = await supabase.from('advertisements').update(payload).eq('id', editing.id);
+        const { error } = await supabase.from('advertisements' as any).update(payload).eq('id', editing.id);
         if (error) throw error;
         toast({ title: 'Advertisement updated' });
       } else {
-        const { error } = await supabase.from('advertisements').insert(payload);
+        const { error } = await supabase.from('advertisements' as any).insert(payload);
         if (error) throw error;
         toast({ title: 'Advertisement created' });
       }
@@ -133,7 +133,7 @@ const AdvertisementsManager = () => {
   const remove = async (id: string) => {
     if (!confirm('Delete this advertisement?')) return;
     try {
-      const { error } = await supabase.from('advertisements').delete().eq('id', id);
+      const { error } = await supabase.from('advertisements' as any).delete().eq('id', id);
       if (error) throw error;
       toast({ title: 'Advertisement deleted' });
       if (editing?.id === id) {

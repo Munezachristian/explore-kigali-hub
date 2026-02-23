@@ -44,7 +44,7 @@ const GalleryManager = () => {
   const fetchGallery = async () => {
     try {
       const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
-      if (data) setItems(data);
+      if (data) setItems(data as unknown as GalleryItem[]);
     } catch (error) {
       console.error('Error fetching gallery:', error);
       toast({ title: 'Error loading gallery', variant: 'destructive' });
@@ -354,7 +354,6 @@ const GalleryManager = () => {
             {item.media_type === 'video' ? (
               <video 
                 src={item.media_url} 
-                alt={item.title || ''} 
                 className="w-full h-full object-cover"
                 muted
               />

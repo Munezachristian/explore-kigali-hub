@@ -9,6 +9,69 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import heroImage from '@/assets/hero-rwanda.jpg';
 
+const ForgotPasswordForm = ({ onBack }: { onBack: () => void }) => {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setSent(true);
+      toast({ title: 'Check your email', description: 'We sent you a password reset link.' });
+    }
+    setLoading(false);
+  };
+
+  if (sent) {
+    return (
+      <div className="text-center space-y-4">
+        <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto" />
+        <h2 className="font-display text-xl font-bold text-foreground">Email Sent!</h2>
+        <p className="font-body text-sm text-muted-foreground">Check your inbox for a password reset link.</p>
+        <Button variant="outline" onClick={onBack} className="font-body">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to login
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label className="font-body text-sm font-medium">Email Address</Label>
+        <div className="relative">
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            type="email"
+            placeholder="you@example.com"
+            className="pl-10 font-body"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+      <Button type="submit" className="w-full bg-gradient-navy text-white border-0 font-body font-semibold h-11" disabled={loading}>
+        {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+        Send Reset Link
+      </Button>
+      <p className="text-center font-body text-sm text-muted-foreground">
+        <button type="button" onClick={onBack} className="text-primary hover:text-accent font-medium flex items-center gap-1 justify-center w-full">
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to login
+        </button>
+      </p>
+    </form>
+  );
+};
+
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -25,7 +88,7 @@ interface FormErrors {
 }
 
 const Auth = () => {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ 
@@ -472,6 +535,10 @@ const Auth = () => {
                   </button>
                 </p>
               </form>
+            )}
+
+            {mode === 'forgot' && (
+              <ForgotPasswordForm onBack={() => setMode('login')} />
             )}
           </div>
         </div>
