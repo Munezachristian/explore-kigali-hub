@@ -234,6 +234,39 @@ export type Database = {
         }
         Relationships: []
       }
+      faqs: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string
+          display_order: number
+          id: string
+          is_published: boolean
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          category?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gallery: {
         Row: {
           category: string | null
@@ -487,6 +520,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      package_itineraries: {
+        Row: {
+          created_at: string
+          day_number: number
+          description: string | null
+          display_order: number
+          id: string
+          location: string | null
+          package_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          day_number?: number
+          description?: string | null
+          display_order?: number
+          id?: string
+          location?: string | null
+          package_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          day_number?: number
+          description?: string | null
+          display_order?: number
+          id?: string
+          location?: string | null
+          package_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_itineraries_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       packages: {
         Row: {
@@ -883,6 +957,45 @@ export type Database = {
         }
         Relationships: []
       }
+      umurage_kids_center: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          is_published: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           assigned_by: string | null
@@ -934,6 +1047,51 @@ export type Database = {
           notes?: string | null
           salary_amount?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      volunteerism_activities: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          is_published: boolean
+          location: string | null
+          max_volunteers: number | null
+          start_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          location?: string | null
+          max_volunteers?: number | null
+          start_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          location?: string | null
+          max_volunteers?: number | null
+          start_date?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
