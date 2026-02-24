@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Package, CalendarCheck, FileText, MessageSquare, Settings, LogOut,
   TrendingUp, Star, Menu, X, Users, BookOpen,
-  Image, Bell, LayoutDashboard, DollarSign, MapPin, Megaphone
+  Image, Bell, LayoutDashboard, DollarSign, MapPin, Megaphone, Heart
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -27,6 +27,7 @@ import SystemLogs from '@/components/admin/SystemLogs';
 import SettingsManager from '@/components/admin/Settings';
 import FinancialManager from '@/components/admin/FinancialManager';
 import AdvertisementsManager from '@/components/admin/AdvertisementsManager';
+import UmurageKidsCenterManager from '@/components/admin/UmurageKidsCenterManager';
 
 interface Stats {
   packages: number;
@@ -124,6 +125,7 @@ const AdminDashboard = () => {
     { id: 'info', icon: MessageSquare, label: 'Info Center' },
     { id: 'information-centers', icon: MapPin, label: 'Information Centers' },
     { id: 'advertisements', icon: Megaphone, label: 'Advertisements' },
+    { id: 'kids-center', icon: Heart, label: 'Umurage Kids Center' },
     { id: 'logs', icon: Bell, label: 'System Logs' },
     { id: 'settings', icon: Settings, label: 'Settings' },
   ];
@@ -343,6 +345,7 @@ const AdminDashboard = () => {
           {activeSection === 'info' && <InfoCenterManager />}
           {activeSection === 'information-centers' && <InformationCentersManager />}
           {activeSection === 'advertisements' && <AdvertisementsManager />}
+          {activeSection === 'kids-center' && <UmurageKidsCenterManager />}
           {activeSection === 'logs' && <SystemLogs />}
           {activeSection === 'settings' && <SettingsManager />}
         </div>
