@@ -29,6 +29,8 @@ import InformationCenters from "./pages/InformationCenters";
 import InformationCenterDetail from "./pages/InformationCenterDetail";
 import DashboardRedirect from "./pages/DashboardRedirect";
 import Sitemap from "./pages/Sitemap";
+import Volunteerism from "./pages/Volunteerism";
+import UmurageKidsCenter from "./pages/UmurageKidsCenter";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SeoHead } from "./components/SeoHead";
 import { AdvertisementPopup } from "./components/AdvertisementPopup";
@@ -66,6 +68,8 @@ const App = () => (
               <Route path="/testimonials" element={<Testimonials />} />
               <Route path="/information-centers" element={<InformationCenters />} />
               <Route path="/information-centers/:id" element={<InformationCenterDetail />} />
+              <Route path="/volunteerism" element={<Volunteerism />} />
+              <Route path="/umurage-kids" element={<UmurageKidsCenter />} />
               <Route path="/dashboard" element={<DashboardRedirect />} />
               <Route path="/sitemap" element={<Sitemap />} />
               <Route path="/admin" element={
