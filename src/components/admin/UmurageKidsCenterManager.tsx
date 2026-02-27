@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import {
-  Plus, Edit, Trash2, Save, X, Search, GripVertical, Heart
+  Plus, Edit, Trash2, Save, X, Search, GripVertical, Heart, Upload
 } from 'lucide-react';
 
 interface KidsCenterItem {
@@ -46,6 +46,8 @@ const UmurageKidsCenterManager = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchItems();
@@ -238,12 +240,52 @@ const UmurageKidsCenterManager = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Image URL</Label>
-                <Input
-                  value={form.image_url}
-                  onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                  placeholder="https://..."
-                />
+                <Label>Images</Label>
+                <div
+                  className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-accent/50 transition-colors cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="font-body text-sm text-muted-foreground">
+                    {uploading ? 'Uploading...' : 'Click to upload (multiple allowed)'}
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={async (e) => {
+                      const files = e.target.files;
+                      if (!files?.length) return;
+                      setUploading(true);
+                      for (const file of Array.from(files)) {
+                        const ext = file.name.split('.').pop();
+                        const path = `kids-center/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+                        const { error } = await supabase.storage.from('activity-images').upload(path, file);
+                        if (error) {
+                          toast({ title: 'Upload failed', description: error.message, variant: 'destructive' });
+                        } else {
+                          const { data: urlData } = supabase.storage.from('activity-images').getPublicUrl(path);
+                          setForm(f => ({ ...f, image_url: urlData.publicUrl }));
+                          toast({ title: 'Uploaded', description: file.name });
+                        }
+                      }
+                      setUploading(false);
+                      if (fileInputRef.current) fileInputRef.current.value = '';
+                    }}
+                  />
+                </div>
+                {form.image_url && (
+                  <div className="flex items-center gap-3 mt-2">
+                    <div className="w-32 h-24 rounded-lg overflow-hidden border border-border">
+                      <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => setForm({ ...form, image_url: '' })} className="text-destructive">
+                      <X className="h-4 w-4 mr-1" /> Remove
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Display Order</Label>
@@ -262,12 +304,6 @@ const UmurageKidsCenterManager = () => {
               />
               <Label>Published</Label>
             </div>
-
-            {form.image_url && (
-              <div className="w-32 h-24 rounded-lg overflow-hidden border border-border">
-                <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
-              </div>
-            )}
 
             <div className="flex gap-2 pt-2">
               <Button onClick={handleSave} disabled={saving}>
