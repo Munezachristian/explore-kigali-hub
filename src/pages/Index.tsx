@@ -126,7 +126,7 @@ const Index = () => {
               className="absolute inset-0 w-full h-full min-w-full min-h-full object-cover"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-hero" />
+          <div className="absolute inset-0 bg-primary/85" />
         </div>
 
         {/* Animated particles */}
@@ -167,7 +167,7 @@ const Index = () => {
             <Button
               asChild
               size="lg"
-              className="bg-gradient-gold text-navy font-semibold text-base px-8 py-4 h-auto border-0 shadow-gold hover:opacity-90 font-body"
+              className="bg-accent text-accent-foreground font-semibold text-base px-8 py-4 h-auto border-0 hover:opacity-90 font-body"
             >
               <Link to={settings.hero_button_link || '/packages'}>
                 {settings.hero_button_text || t('hero.cta')} <ArrowRight className="ml-2 w-5 h-5" />
@@ -215,8 +215,8 @@ const Index = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="bg-card rounded-2xl p-6 shadow-card hover-lift text-center group">
-                <div className="w-14 h-14 bg-gradient-gold rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-gold">
-                  <Icon className="w-7 h-7 text-navy" />
+                <div className="w-14 h-14 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Icon className="w-7 h-7 text-accent-foreground" />
                 </div>
                 <h3 className="font-display text-lg font-semibold text-foreground mb-2">{title}</h3>
                 <p className="font-body text-sm text-muted-foreground">{desc}</p>
@@ -248,7 +248,7 @@ const Index = () => {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-4 py-1.5 rounded-full font-body text-sm font-medium transition-all duration-200 ${
                   activeCategory === cat
-                    ? 'bg-gradient-navy text-white shadow-md'
+                    ? 'bg-primary text-primary-foreground shadow-md'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}
               >
@@ -272,7 +272,7 @@ const Index = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="section-padding bg-gradient-navy">
+      <section className="section-padding bg-primary">
         <div className="container-max mx-auto">
           <div className="text-center mb-12">
             <div className="gold-divider mx-auto mb-4" />
@@ -289,8 +289,8 @@ const Index = () => {
                 </div>
                 <p className="font-body text-white/80 text-sm leading-relaxed mb-4 italic">"{t_.content}"</p>
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-gradient-gold flex items-center justify-center">
-                    <span className="font-display font-bold text-navy text-sm">{t_.client_name?.[0]}</span>
+                  <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center">
+                    <span className="font-display font-bold text-accent-foreground text-sm">{t_.client_name?.[0]}</span>
                   </div>
                   <div>
                     <div className="font-body font-semibold text-white text-sm">{t_.client_name}</div>
@@ -331,7 +331,7 @@ const Index = () => {
                     alt={item.title || 'Gallery'}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-hero opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <div className="absolute inset-0 bg-primary/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                     <span className="font-body text-white font-medium text-sm">{item.title}</span>
                   </div>
                 </div>
@@ -441,7 +441,7 @@ const Index = () => {
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <Button asChild size="sm" className="bg-gradient-navy text-white hover:opacity-90 border-0 font-body flex-1">
+                      <Button asChild size="sm" className="bg-primary text-primary-foreground hover:opacity-90 border-0 font-body flex-1">
                         <Link to={`/information-centers/${center.id}`}>View Details</Link>
                       </Button>
                       {center.latitude && center.longitude && (
@@ -464,7 +464,7 @@ const Index = () => {
       )}
 
       {/* CTA Section */}
-      <section className="section-padding relative overflow-hidden bg-gradient-teal">
+      <section className="section-padding relative overflow-hidden bg-secondary">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
@@ -478,7 +478,7 @@ const Index = () => {
             Join thousands of travelers who have discovered the magic of Rwanda with ESA Tours
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-gradient-gold text-navy font-semibold border-0 shadow-gold hover:opacity-90 px-8 font-body">
+            <Button asChild size="lg" className="bg-accent text-accent-foreground font-semibold border-0 hover:opacity-90 px-8 font-body">
               <Link to="/packages">Browse Packages <ArrowRight className="ml-2 w-5 h-5" /></Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 px-8 font-body">
@@ -498,30 +498,21 @@ const Index = () => {
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Interactive Map */}
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="bg-card rounded-2xl shadow-lg overflow-hidden">
               <div className="h-96">
-                {import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? (
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    loading="lazy"
-                    allowFullScreen
-                    referrerPolicy="no-referrer-when-downgrade"
-                    src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=KN+4+Ave,+Kigali,+Rwanda&zoom=15`}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Map unavailable</p>
-                    <p className="text-sm text-gray-500">KN 4 Ave, Kigali, Rwanda</p>
-                  </div>
-                )}
+                <iframe
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=29.35%2C-1.96%2C29.37%2C-1.94&layer=mapnik&marker=-1.9503%2C29.3603"
+                />
               </div>
-              <div className="p-4 bg-gradient-navy">
-                <h3 className="font-display text-lg font-semibold text-white mb-2">Main Office</h3>
-                <p className="text-white/80 text-sm">{settings.address || "KN 4 Ave, Kigali, Rwanda"}</p>
-                <div className="flex items-center gap-4 text-white/60 text-sm">
+              <div className="p-4 bg-primary">
+                <h3 className="font-display text-lg font-semibold text-primary-foreground mb-2">Main Office</h3>
+                <p className="text-primary-foreground/80 text-sm">{settings.address || "KN 4 Ave, Kigali, Rwanda"}</p>
+                <div className="flex items-center gap-4 text-primary-foreground/60 text-sm">
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4" />
                     <span>{settings.contact_phone || "+250 788 123 456"}</span>
@@ -583,12 +574,12 @@ const PackageCard = ({ pkg, t }: { pkg: any; t: (key: string) => string }) => (
         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
       />
       {pkg.category && (
-        <Badge className="absolute top-3 left-3 bg-gradient-gold text-navy border-0 font-body text-xs font-semibold shadow">
+        <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0 font-body text-xs font-semibold shadow">
           {pkg.category}
         </Badge>
       )}
       {pkg.is_featured && (
-        <Badge className="absolute top-3 right-3 bg-gradient-navy text-white border-0 font-body text-xs font-semibold shadow">
+        <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground border-0 font-body text-xs font-semibold shadow">
           ⭐ Featured
         </Badge>
       )}
@@ -605,7 +596,7 @@ const PackageCard = ({ pkg, t }: { pkg: any; t: (key: string) => string }) => (
           <div className="font-body text-xs text-muted-foreground">{t('packages.from')}</div>
           <div className="font-display font-bold text-xl text-primary">${pkg.price?.toLocaleString()}</div>
         </div>
-        <Button asChild size="sm" className="bg-gradient-navy text-white hover:opacity-90 border-0 font-body">
+        <Button asChild size="sm" className="bg-primary text-primary-foreground hover:opacity-90 border-0 font-body">
           <Link to={`/packages/${pkg.id}`}>Book Now</Link>
         </Button>
       </div>
