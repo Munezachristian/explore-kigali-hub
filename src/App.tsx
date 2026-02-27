@@ -20,6 +20,7 @@ import PackageDetail from "./pages/PackageDetail";
 import Internships from "./pages/Internships";
 import Gallery from "./pages/Gallery";
 import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Info from "./pages/Info";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -37,7 +38,14 @@ import { AdvertisementPopup } from "./components/AdvertisementPopup";
 import WhatsAppButton from "./components/WhatsAppButton";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -61,6 +69,7 @@ const App = () => (
               <Route path="/internships" element={<Internships />} />
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogPost />} />
               <Route path="/info" element={<Info />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />

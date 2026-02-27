@@ -9,6 +9,7 @@ import {
   Search, FileText, Users, CheckCircle, XCircle, Eye, Download, Edit,
   Calendar, Mail, Phone, GraduationCap, Briefcase, ChevronLeft, ChevronRight, Clock
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Internship {
   id: string;
@@ -27,6 +28,7 @@ interface Internship {
 }
 
 const InternshipsManager = () => {
+  const { toast } = useToast();
   const [internships, setInternships] = useState<Internship[]>([]);
   const [filteredInternships, setFilteredInternships] = useState<Internship[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,14 +78,21 @@ const InternshipsManager = () => {
 
   const updateStatus = async (id: string, newStatus: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       const { error } = await supabase
         .from('internships')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .update({ 
+          status: newStatus, 
+          reviewed_by: user?.id || null,
+          updated_at: new Date().toISOString() 
+        })
         .eq('id', id);
       if (error) throw error;
       setInternships(prev => prev.map(i => i.id === id ? { ...i, status: newStatus } : i));
-    } catch (error) {
+      toast({ title: 'Success', description: `Application ${newStatus} successfully` });
+    } catch (error: any) {
       console.error('Error updating status:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
     }
   };
 

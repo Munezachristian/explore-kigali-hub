@@ -100,7 +100,7 @@ const Blog = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative h-64 bg-gradient-navy flex items-center justify-center overflow-hidden">
+      <section className="relative h-64 bg-primary flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative z-10 text-center text-white px-4">
           <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
