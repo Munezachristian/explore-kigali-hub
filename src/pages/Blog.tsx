@@ -82,12 +82,12 @@ const Blog = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container-max mx-auto px-4 md:px-8 py-20">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading blog posts...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading blog posts...</p>
           </div>
         </div>
         <Footer />
@@ -96,7 +96,7 @@ const Blog = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Hero Section */}
@@ -115,7 +115,7 @@ const Blog = () => {
       {/* Featured Post */}
       {featuredPost && (
         <section className="container-max mx-auto px-4 md:px-8 py-12">
-          <div className="bg-gradient-to-r from-sky-600 to-blue-700 rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-primary rounded-2xl overflow-hidden shadow-xl">
             <div className="grid md:grid-cols-2 gap-0">
               <div className="relative h-64 md:h-auto">
                 <img
@@ -124,10 +124,10 @@ const Blog = () => {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-4 left-4">
-                  <Badge className="bg-white/90 text-sky-700">Featured</Badge>
+                  <Badge className="bg-white/90 text-primary">Featured</Badge>
                 </div>
               </div>
-              <div className="p-8 md:p-12 text-white">
+              <div className="p-8 md:p-12 text-primary-foreground">
                 <div className="flex items-center gap-4 mb-4 text-sm">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
@@ -141,10 +141,10 @@ const Blog = () => {
                 <h2 className="font-display text-2xl md:text-3xl font-bold mb-4">
                   {featuredPost.title}
                 </h2>
-                <p className="font-body text-white/90 mb-6 line-clamp-3">
+                <p className="font-body text-primary-foreground/90 mb-6 line-clamp-3">
                   {featuredPost.excerpt}
                 </p>
-                <Button asChild variant="secondary" className="bg-white text-sky-700 hover:bg-gray-100">
+                <Button asChild variant="secondary" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
                   <Link to={`/blog/${featuredPost.id}`}>
                     Read More <ArrowRight className="h-4 w-4 ml-2" />
                   </Link>
@@ -223,7 +223,7 @@ const Blog = () => {
                       {readingTime(post.content)} min
                     </span>
                   </div>
-                  <CardTitle className="line-clamp-2 group-hover:text-sky-600 transition-colors">
+                  <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">
                     {post.title}
                   </CardTitle>
                   <CardDescription className="line-clamp-3">

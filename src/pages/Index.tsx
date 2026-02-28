@@ -153,7 +153,7 @@ const Index = () => {
 
           <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 animate-fade-up" style={{ animationDelay: '0.1s' }}>
             {(settings.hero_title || t('hero.title')).split(' ').map((word, i) => (
-              <span key={i} className={i >= 1 && i <= 2 ? 'text-gradient-gold' : ''}>
+              <span key={i} className={i >= 1 && i <= 2 ? 'text-accent' : ''}>
                 {word}{' '}
               </span>
             ))}

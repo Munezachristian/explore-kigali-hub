@@ -70,7 +70,7 @@ const Internships = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <section className="bg-gradient-navy py-20 px-4">
+      <section className="bg-primary py-20 px-4">
         <div className="container-max mx-auto text-center">
           <div className="gold-divider mx-auto mb-4" />
           <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-4">Internship Program</h1>
@@ -126,7 +126,7 @@ const Internships = () => {
                 <h4 className="font-display text-base font-semibold text-foreground mb-3">Application Process</h4>
                 {['Submit your application', 'Team reviews within 5 days', 'Interview invitation', 'Offer & onboarding'].map((step, i) => (
                   <div key={i} className="flex items-center gap-3 mb-2 last:mb-0">
-                    <div className="w-6 h-6 rounded-full bg-gradient-gold flex items-center justify-center shrink-0"><span className="text-navy text-xs font-bold">{i + 1}</span></div>
+                    <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center shrink-0"><span className="text-accent-foreground text-xs font-bold">{i + 1}</span></div>
                     <span className="font-body text-sm text-muted-foreground">{step}</span>
                   </div>
                 ))}
@@ -180,7 +180,7 @@ const Internships = () => {
                       <input id="cv-input" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f && f.size <= 5 * 1024 * 1024) setCvFile(f); else if (f) toast({ title: 'File too large', description: 'Max 5MB', variant: 'destructive' }); }} />
                     </div>
                   </div>
-                  <Button type="submit" disabled={submitting} className="w-full bg-gradient-gold text-navy font-semibold border-0 shadow-gold hover:opacity-90 font-body h-12">
+                  <Button type="submit" disabled={submitting} className="w-full bg-accent text-accent-foreground font-semibold border-0 hover:opacity-90 font-body h-12">
                     {submitting ? 'Submitting...' : 'Submit Application'}
                   </Button>
                   {!user && <p className="font-body text-xs text-muted-foreground text-center">You can apply without an account. Create one to track your application status.</p>}

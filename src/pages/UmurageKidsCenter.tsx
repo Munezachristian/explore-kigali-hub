@@ -42,7 +42,7 @@ const UmurageKidsCenter = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-gradient-navy py-20 px-4">
+      <section className="bg-primary py-20 px-4">
         <div className="container-max mx-auto text-center">
           <div className="gold-divider mx-auto mb-4" />
           <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-4">
@@ -102,7 +102,7 @@ const UmurageKidsCenter = () => {
                       />
                     </div>
                   ) : (
-                    <div className="h-48 bg-gradient-gold flex items-center justify-center">
+                    <div className="h-48 bg-accent flex items-center justify-center">
                       <Heart className="w-12 h-12 text-white/60" />
                     </div>
                   )}

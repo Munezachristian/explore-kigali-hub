@@ -163,7 +163,7 @@ const PackageDetail = () => {
                     {reviews.map(r => (
                       <div key={r.id} className="bg-card rounded-xl p-4 shadow-card">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-gold flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
                             <span className="font-display font-bold text-navy text-xs">{r.reviewer_name?.[0] || '?'}</span>
                           </div>
                           <span className="font-body text-sm font-medium text-foreground">{r.reviewer_name || 'Anonymous'}</span>
@@ -225,7 +225,7 @@ const PackageDetail = () => {
                     )}
                   </div>
 
-                  <Button type="submit" disabled={submitting} className="w-full bg-gradient-gold text-navy font-semibold border-0 shadow-gold hover:opacity-90 font-body h-12">
+                  <Button type="submit" disabled={submitting} className="w-full bg-accent text-accent-foreground font-semibold border-0 hover:opacity-90 font-body h-12">
                     {submitting ? 'Submitting...' : user ? (confirmationFee > 0 ? `Book Now (Pay $${confirmationFee} to confirm)` : 'Book Now') : 'Sign in to Book'}
                   </Button>
                 </form>

@@ -49,7 +49,7 @@ const Packages = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-gradient-navy py-20 px-4">
+      <section className="bg-primary py-20 px-4">
         <div className="container-max mx-auto text-center">
           <div className="gold-divider mx-auto mb-4" />
           <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-4">Tour Packages</h1>
@@ -78,7 +78,7 @@ const Packages = () => {
                   key={cat}
                   onClick={() => setCategory(cat)}
                   className={`px-4 py-1.5 rounded-full font-body text-sm font-medium transition-all ${
-                    category === cat ? 'bg-gradient-navy text-white shadow-md' : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    category === cat ? 'bg-primary text-primary-foreground shadow-md' : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   }`}
                 >
                   {cat}
@@ -114,7 +114,7 @@ const Packages = () => {
                 <Link to={`/packages/${pkg.id}`} key={pkg.id} className="bg-card rounded-2xl overflow-hidden shadow-card hover-lift group block">
                   <div className="relative h-52 overflow-hidden">
                     <img src={pkg.images?.[0] || '/placeholder.svg'} alt={pkg.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    {pkg.category && <Badge className="absolute top-3 left-3 bg-gradient-gold text-navy border-0 font-body text-xs font-semibold">{pkg.category}</Badge>}
+                    {pkg.category && <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0 font-body text-xs font-semibold">{pkg.category}</Badge>}
                     {pkg.discount > 0 && <Badge className="absolute top-3 right-3 bg-destructive text-destructive-foreground border-0 font-body text-xs">-{pkg.discount}%</Badge>}
                   </div>
                   <div className="p-5">

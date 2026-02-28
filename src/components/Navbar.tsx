@@ -50,7 +50,7 @@ const Navbar = () => {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled
-          ? 'bg-gradient-navy shadow-lg backdrop-blur-sm'
+          ? 'bg-primary shadow-lg backdrop-blur-sm'
           : 'bg-transparent'
       }`}
     >
@@ -61,8 +61,8 @@ const Navbar = () => {
             {settings.system_logo ? (
               <img src={settings.system_logo} alt={settings.system_name} className="h-10 w-auto object-contain" />
             ) : (
-              <div className="w-10 h-10 bg-gradient-gold rounded-xl flex items-center justify-center shadow-gold group-hover:scale-105 transition-transform">
-                <span className="text-navy font-display font-bold text-lg">E</span>
+              <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
+                <span className="text-accent-foreground font-display font-bold text-lg">E</span>
               </div>
             )}
             <div>
@@ -113,8 +113,8 @@ const Navbar = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="text-white hover:text-white hover:bg-white/10 gap-2 font-body">
-                    <div className="w-8 h-8 rounded-full bg-gradient-gold flex items-center justify-center">
-                      <User className="w-4 h-4 text-navy" />
+                    <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                      <User className="w-4 h-4 text-accent-foreground" />
                     </div>
                     <ChevronDown className="w-3 h-3" />
                   </Button>
@@ -148,7 +148,7 @@ const Navbar = () => {
                 <Button
                   size="sm"
                   onClick={() => navigate('/auth?mode=register')}
-                  className="bg-gradient-gold text-navy font-semibold hover:opacity-90 shadow-gold font-body border-0"
+                  className="bg-accent text-accent-foreground font-semibold hover:opacity-90 font-body border-0"
                 >
                   {t('register')}
                 </Button>
@@ -168,7 +168,7 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       {isMobileOpen && (
-        <div className="lg:hidden bg-gradient-navy border-t border-white/10">
+        <div className="lg:hidden bg-primary border-t border-white/10">
           <div className="px-4 py-4 flex flex-col gap-1">
             {navLinks.map((link) => (
               <Link
@@ -198,7 +198,7 @@ const Navbar = () => {
                   <Button variant="ghost" onClick={() => { navigate('/auth'); setIsMobileOpen(false); }} className="text-white justify-start font-body">
                     {t('login')}
                   </Button>
-                  <Button onClick={() => { navigate('/auth?mode=register'); setIsMobileOpen(false); }} className="bg-gradient-gold text-navy font-semibold border-0 font-body">
+                  <Button onClick={() => { navigate('/auth?mode=register'); setIsMobileOpen(false); }} className="bg-accent text-accent-foreground font-semibold border-0 font-body">
                     {t('register')}
                   </Button>
                 </>
