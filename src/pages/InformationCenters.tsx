@@ -96,7 +96,7 @@ function CenterCard({
       <CardHeader>
         <CardTitle className="flex items-start justify-between">
           <span className="flex-1">{center.name}</span>
-          <MapPin className="h-5 w-5 text-sky-600 flex-shrink-0 ml-2" />
+          <MapPin className="h-5 w-5 text-primary flex-shrink-0 ml-2" />
         </CardTitle>
         <CardDescription className="flex items-center gap-1 text-sm">
           <MapPin className="h-3 w-3" />
@@ -220,12 +220,12 @@ const InformationCenters = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container-max mx-auto px-4 md:px-8 py-12">
           <div className="animate-pulse space-y-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-48 bg-gray-200 rounded"></div>
+              <div key={i} className="h-48 bg-muted rounded"></div>
             ))}
           </div>
         </div>
@@ -235,7 +235,7 @@ const InformationCenters = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Hero Section */}

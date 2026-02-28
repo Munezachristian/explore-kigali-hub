@@ -40,7 +40,7 @@ const Volunteerism = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-gradient-navy py-20 px-4">
+      <section className="bg-primary py-20 px-4">
         <div className="container-max mx-auto text-center">
           <div className="gold-divider mx-auto mb-4" />
           <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-4">
@@ -81,7 +81,7 @@ const Volunteerism = () => {
                       />
                     </div>
                   ) : (
-                    <div className="h-48 bg-gradient-teal flex items-center justify-center">
+                    <div className="h-48 bg-secondary flex items-center justify-center">
                       <HandHeart className="w-12 h-12 text-white/60" />
                     </div>
                   )}

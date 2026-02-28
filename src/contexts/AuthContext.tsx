@@ -75,8 +75,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
         
+        if (error) {
+          // Clear invalid session (e.g. expired refresh token)
+          console.warn('Session recovery failed, signing out:', error.message);
+          await supabase.auth.signOut();
+        }
+
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);

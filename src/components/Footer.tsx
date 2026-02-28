@@ -15,7 +15,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gradient-navy text-white">
+    <footer className="bg-primary text-primary-foreground">
       {/* Newsletter bar */}
       <div className="border-b border-white/10">
         <div className="container-max mx-auto px-4 md:px-8 py-10">
@@ -33,7 +33,7 @@ const Footer = () => {
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/40 min-w-[260px] font-body"
                 required
               />
-              <Button type="submit" className="bg-gradient-gold text-navy font-semibold border-0 shadow-gold hover:opacity-90 font-body">
+              <Button type="submit" className="bg-accent text-accent-foreground font-semibold border-0 hover:opacity-90 font-body">
                 <Send className="w-4 h-4 mr-1" /> Subscribe
               </Button>
             </form>
@@ -50,8 +50,8 @@ const Footer = () => {
               {settings.system_logo ? (
                 <img src={settings.system_logo} alt={settings.system_name} className="h-10 w-auto object-contain" />
               ) : (
-                <div className="w-10 h-10 bg-gradient-gold rounded-xl flex items-center justify-center">
-                  <span className="text-navy font-display font-bold text-lg">E</span>
+                <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center">
+                  <span className="text-accent-foreground font-display font-bold text-lg">E</span>
                 </div>
               )}
               <div>
