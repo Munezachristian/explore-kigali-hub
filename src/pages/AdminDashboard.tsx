@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Package, CalendarCheck, FileText, MessageSquare, Settings, LogOut,
   TrendingUp, Star, Menu, X, Users, BookOpen,
-  Image, Bell, LayoutDashboard, DollarSign, MapPin, Megaphone, Heart, HandHeart
+  Image, Bell, LayoutDashboard, DollarSign, MapPin, Megaphone, Heart, HandHeart, AlertCircle
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -63,6 +63,7 @@ const AdminDashboard = () => {
   const [bookingChartData, setBookingChartData] = useState<any[]>([]);
   const [revenueChartData, setRevenueChartData] = useState<any[]>([]);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user || role !== 'admin') {
@@ -75,13 +76,29 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       setStatsLoading(true);
-      const [{ count: pkgCount }, { count: bkCount }, { data: payments }, { count: intCount }, { count: testiCount }] = await Promise.all([
+      setStatsError(null);
+      console.log('[Admin] Fetching dashboard stats...');
+
+      const [{ count: pkgCount, error: e1 }, { count: bkCount, error: e2 }, { data: payments, error: e3 }, { count: intCount, error: e4 }, { count: testiCount, error: e5 }] = await Promise.all([
         supabase.from('packages').select('*', { count: 'exact', head: true }),
         supabase.from('bookings').select('*', { count: 'exact', head: true }),
         supabase.from('payments').select('amount, created_at').eq('status', 'confirmed'),
         supabase.from('internships').select('*', { count: 'exact', head: true }),
         supabase.from('testimonials').select('*', { count: 'exact', head: true }).eq('is_approved', false),
       ]);
+
+      // Check for auth errors
+      const errors = [e1, e2, e3, e4, e5].filter(Boolean);
+      if (errors.some(e => e?.message?.includes('JWT') || e?.code === 'PGRST301')) {
+        console.error('[Admin] Auth error in stats fetch, signing out');
+        await signOut();
+        navigate('/auth');
+        return;
+      }
+      if (errors.length) {
+        console.error('[Admin] Stats fetch errors:', errors);
+      }
+
       const revenue = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
       setStats({ packages: pkgCount || 0, bookings: bkCount || 0, revenue, internships: intCount || 0, testimonials: testiCount || 0 });
 
@@ -106,8 +123,11 @@ const AdminDashboard = () => {
         });
         setRevenueChartData(Object.entries(byMonth).map(([name, revenue]) => ({ name, revenue })));
       }
-    } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+
+      console.log('[Admin] Stats loaded successfully');
+    } catch (error: any) {
+      console.error('[Admin] Stats fetch exception:', error);
+      setStatsError(error?.message || 'Failed to load dashboard data');
     } finally {
       setStatsLoading(false);
     }
@@ -133,43 +153,43 @@ const AdminDashboard = () => {
   ];
 
   const statCards = [
-    { label: 'Total Revenue', value: `$${stats.revenue.toLocaleString()}`, icon: DollarSign, gradient: 'bg-gradient-to-br from-emerald-500 to-teal-600', sub: 'Confirmed payments' },
-    { label: 'Total Bookings', value: stats.bookings, icon: CalendarCheck, gradient: 'bg-gradient-to-br from-blue-500 to-indigo-600', sub: 'All time' },
-    { label: 'Tour Packages', value: stats.packages, icon: Package, gradient: 'bg-gradient-to-br from-amber-500 to-orange-600', sub: 'Active listings' },
-    { label: 'Pending Reviews', value: stats.testimonials, icon: Star, gradient: 'bg-gradient-to-br from-purple-500 to-violet-600', sub: 'Awaiting approval' },
+    { label: 'Total Revenue', value: `$${stats.revenue.toLocaleString()}`, icon: DollarSign, color: 'bg-emerald-600', sub: 'Confirmed payments' },
+    { label: 'Total Bookings', value: stats.bookings, icon: CalendarCheck, color: 'bg-blue-600', sub: 'All time' },
+    { label: 'Tour Packages', value: stats.packages, icon: Package, color: 'bg-amber-600', sub: 'Active listings' },
+    { label: 'Pending Reviews', value: stats.testimonials, icon: Star, color: 'bg-purple-600', sub: 'Awaiting approval' },
   ];
 
   return (
     <div className="min-h-screen bg-muted/30 flex">
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-gradient-navy flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:inset-auto`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:inset-auto`}>
         {/* Brand */}
-        <div className="p-5 border-b border-white/10">
+        <div className="p-5 border-b border-sidebar-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gradient-gold rounded-xl flex items-center justify-center shadow-gold">
-                <span className="text-navy font-display font-bold">E</span>
+              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
+                <span className="text-primary-foreground font-display font-bold">E</span>
               </div>
               <div>
-                <div className="font-display font-bold text-white text-base">ESA Tours</div>
-                <div className="font-body text-gold text-xs">Admin Panel</div>
+                <div className="font-display font-bold text-sidebar-foreground text-base">ESA Tours</div>
+                <div className="font-body text-sidebar-foreground/60 text-xs">Admin Panel</div>
               </div>
             </div>
-            <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-white/60 hover:text-white">
+            <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-sidebar-foreground/60 hover:text-sidebar-foreground">
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* User info */}
-        <div className="px-4 py-3 border-b border-white/10">
-          <div className="flex items-center gap-3 p-2 rounded-xl bg-white/8">
-            <div className="w-9 h-9 rounded-full bg-gradient-gold flex items-center justify-center shrink-0">
-              <span className="font-display font-bold text-navy text-sm">{user?.email?.[0]?.toUpperCase()}</span>
+        <div className="px-4 py-3 border-b border-sidebar-border">
+          <div className="flex items-center gap-3 p-2 rounded-xl bg-sidebar-accent">
+            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0">
+              <span className="font-display font-bold text-primary-foreground text-sm">{user?.email?.[0]?.toUpperCase()}</span>
             </div>
             <div className="min-w-0">
-              <div className="font-body text-white text-sm font-medium truncate">{user?.email}</div>
-              <Badge className="bg-gold/20 text-gold border-0 text-[10px] font-body mt-0.5">Super Admin</Badge>
+              <div className="font-body text-sidebar-foreground text-sm font-medium truncate">{user?.email}</div>
+              <Badge className="bg-accent text-accent-foreground border-0 text-[10px] font-body mt-0.5">Super Admin</Badge>
             </div>
           </div>
         </div>
@@ -182,14 +202,14 @@ const AdminDashboard = () => {
               onClick={() => { setActiveSection(id); setSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 font-body text-sm ${
                 activeSection === id
-                  ? 'bg-gradient-gold text-navy font-semibold shadow-gold'
-                  : 'text-white/70 hover:text-white hover:bg-white/8'
+                  ? 'bg-primary text-primary-foreground font-semibold'
+                  : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'
               }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
               <span className="flex-1 text-left">{label}</span>
               {badge ? (
-                <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${activeSection === id ? 'bg-navy text-white' : 'bg-red-500 text-white'}`}>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${activeSection === id ? 'bg-primary-foreground text-primary' : 'bg-destructive text-destructive-foreground'}`}>
                   {badge}
                 </span>
               ) : null}
@@ -198,10 +218,10 @@ const AdminDashboard = () => {
         </nav>
 
         {/* Sign out */}
-        <div className="p-3 border-t border-white/10">
+        <div className="p-3 border-t border-sidebar-border">
           <button
             onClick={signOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:text-red-400 hover:bg-red-400/10 transition-colors font-body text-sm"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-colors font-body text-sm"
           >
             <LogOut className="w-4 h-4" />
             {t('dash.signOut')}
@@ -245,14 +265,20 @@ const AdminDashboard = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
                   <span className="text-muted-foreground">Loading dashboard data...</span>
                 </div>
+              ) : statsError ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-4">
+                  <AlertCircle className="w-12 h-12 text-destructive" />
+                  <p className="text-destructive font-body">{statsError}</p>
+                  <Button onClick={fetchStats} variant="outline">Retry</Button>
+                </div>
               ) : (
                 <>
                   {/* Stats */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                    {statCards.map(({ label, value, icon: Icon, gradient, sub }) => (
+                    {statCards.map(({ label, value, icon: Icon, color, sub }) => (
                       <div key={label} className="bg-card rounded-2xl p-5 shadow-card">
                         <div className="flex items-start justify-between mb-3">
-                          <div className={`w-11 h-11 rounded-xl ${gradient} flex items-center justify-center shadow-md`}>
+                          <div className={`w-11 h-11 rounded-xl ${color} flex items-center justify-center shadow-md`}>
                             <Icon className="w-5 h-5 text-white" />
                           </div>
                           <TrendingUp className="w-4 h-4 text-emerald-500" />
@@ -266,7 +292,6 @@ const AdminDashboard = () => {
 
                   {/* Charts */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Bookings Chart */}
                     <div className="bg-card rounded-2xl shadow-card p-6">
                       <h3 className="font-display text-lg font-semibold text-foreground mb-4">Bookings Over Time</h3>
                       {bookingChartData.length > 0 ? (
@@ -275,7 +300,7 @@ const AdminDashboard = () => {
                             <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                             <YAxis tick={{ fontSize: 12 }} />
                             <Tooltip />
-                            <Bar dataKey="count" fill="hsl(175,55%,28%)" radius={[6, 6, 0, 0]} />
+                            <Bar dataKey="count" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       ) : (
@@ -283,7 +308,6 @@ const AdminDashboard = () => {
                       )}
                     </div>
 
-                    {/* Revenue Chart */}
                     <div className="bg-card rounded-2xl shadow-card p-6">
                       <h3 className="font-display text-lg font-semibold text-foreground mb-4">Revenue Over Time</h3>
                       {revenueChartData.length > 0 ? (
@@ -292,7 +316,7 @@ const AdminDashboard = () => {
                             <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                             <YAxis tick={{ fontSize: 12 }} />
                             <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']} />
-                            <Bar dataKey="revenue" fill="hsl(45,93%,47%)" radius={[6, 6, 0, 0]} />
+                            <Bar dataKey="revenue" fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       ) : (
@@ -318,12 +342,8 @@ const AdminDashboard = () => {
                             {recentBookings.map((booking) => (
                               <tr key={booking.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                                 <td className="py-2.5 px-3 text-foreground">{booking.packages?.title ?? 'N/A'}</td>
-                                <td className="py-2.5 px-3">
-                                  <StatusBadge status={booking.status} />
-                                </td>
-                                <td className="py-2.5 px-3 text-muted-foreground">
-                                  {new Date(booking.created_at).toLocaleDateString()}
-                                </td>
+                                <td className="py-2.5 px-3"><StatusBadge status={booking.status} /></td>
+                                <td className="py-2.5 px-3 text-muted-foreground">{new Date(booking.created_at).toLocaleDateString()}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -358,4 +378,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
