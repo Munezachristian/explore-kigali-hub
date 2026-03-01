@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { 
-  Search, FileText, Users, CheckCircle, XCircle, Eye, Download, Edit,
-  Calendar, Mail, Phone, GraduationCap, Briefcase, ChevronLeft, ChevronRight, Clock
+  Search, FileText, Users, CheckCircle, XCircle, Eye, Download,
+  Calendar, Phone, GraduationCap, Briefcase, ChevronLeft, ChevronRight, Clock, AlertCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,6 +31,7 @@ const InternshipsManager = () => {
   const [internships, setInternships] = useState<Internship[]>([]);
   const [filteredInternships, setFilteredInternships] = useState<Internship[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,15 +40,11 @@ const InternshipsManager = () => {
   const internshipsPerPage = 10;
   const statuses = ['all', 'pending', 'reviewing', 'accepted', 'rejected'];
 
-  useEffect(() => {
-    fetchInternships();
-  }, []);
+  useEffect(() => { fetchInternships(); }, []);
 
   useEffect(() => {
     let filtered = internships;
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(i => i.status === statusFilter);
-    }
+    if (statusFilter !== 'all') filtered = filtered.filter(i => i.status === statusFilter);
     if (searchTerm) {
       filtered = filtered.filter(i =>
         i.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -62,15 +58,17 @@ const InternshipsManager = () => {
 
   const fetchInternships = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const { data, error } = await supabase
         .from('internships')
         .select('*')
         .order('created_at', { ascending: false });
       if (error) throw error;
       setInternships((data || []) as unknown as Internship[]);
-      setFilteredInternships((data || []) as unknown as Internship[]);
-    } catch (error) {
-      console.error('Error fetching internships:', error);
+    } catch (err: any) {
+      console.error('[Internships] Fetch error:', err);
+      setError(err.message || 'Failed to load internships');
     } finally {
       setLoading(false);
     }
@@ -81,18 +79,14 @@ const InternshipsManager = () => {
       const { data: { user } } = await supabase.auth.getUser();
       const { error } = await supabase
         .from('internships')
-        .update({ 
-          status: newStatus, 
-          reviewed_by: user?.id || null,
-          updated_at: new Date().toISOString() 
-        })
+        .update({ status: newStatus, reviewed_by: user?.id || null, updated_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;
       setInternships(prev => prev.map(i => i.id === id ? { ...i, status: newStatus } : i));
       toast({ title: 'Success', description: `Application ${newStatus} successfully` });
-    } catch (error: any) {
-      console.error('Error updating status:', error);
-      toast({ title: 'Error', description: error.message || 'Failed to update status', variant: 'destructive' });
+    } catch (err: any) {
+      console.error('[Internships] Update error:', err);
+      toast({ title: 'Error', description: err.message || 'Failed to update status', variant: 'destructive' });
     }
   };
 
@@ -113,11 +107,19 @@ const InternshipsManager = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/4 mb-4" />
-          {[1, 2, 3].map(i => <div key={i} className="h-32 bg-muted rounded mb-4" />)}
-        </div>
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3" />
+        <span className="text-muted-foreground">Loading internships...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-4">
+        <AlertCircle className="w-12 h-12 text-destructive" />
+        <p className="text-destructive">{error}</p>
+        <Button onClick={fetchInternships} variant="outline">Retry</Button>
       </div>
     );
   }
@@ -204,13 +206,15 @@ const InternshipsManager = () => {
                   {intern.cv_url && (
                     <Button variant="ghost" size="sm" onClick={() => window.open(intern.cv_url!, '_blank')}><Download className="h-4 w-4" /></Button>
                   )}
-                  {intern.status === 'pending' && (
-                    <Button variant="ghost" size="sm" onClick={() => updateStatus(intern.id, 'reviewing')} className="text-blue-600"><Search className="h-4 w-4" /></Button>
-                  )}
-                  {intern.status === 'reviewing' && (
+                  {/* Show accept/reject for both pending and reviewing */}
+                  {(intern.status === 'pending' || intern.status === 'reviewing') && (
                     <>
-                      <Button variant="ghost" size="sm" onClick={() => updateStatus(intern.id, 'accepted')} className="text-emerald-600" title="Accept"><CheckCircle className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="sm" onClick={() => updateStatus(intern.id, 'rejected')} className="text-red-600" title="Reject"><XCircle className="h-4 w-4" /></Button>
+                      <Button variant="outline" size="sm" onClick={() => updateStatus(intern.id, 'accepted')} className="text-emerald-600 border-emerald-200 hover:bg-emerald-50" title="Accept">
+                        <CheckCircle className="h-4 w-4 mr-1" /> Accept
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => updateStatus(intern.id, 'rejected')} className="text-red-600 border-red-200 hover:bg-red-50" title="Reject">
+                        <XCircle className="h-4 w-4 mr-1" /> Reject
+                      </Button>
                     </>
                   )}
                 </div>
@@ -262,6 +266,16 @@ const InternshipsManager = () => {
               </div>
               <div className="flex justify-end gap-2 mt-6">
                 <Button variant="outline" onClick={() => setSelectedInternship(null)}>Close</Button>
+                {(selectedInternship.status === 'pending' || selectedInternship.status === 'reviewing') && (
+                  <>
+                    <Button onClick={() => { updateStatus(selectedInternship.id, 'accepted'); setSelectedInternship(null); }} className="bg-emerald-600 hover:bg-emerald-700">
+                      <CheckCircle className="h-4 w-4 mr-2" /> Accept
+                    </Button>
+                    <Button onClick={() => { updateStatus(selectedInternship.id, 'rejected'); setSelectedInternship(null); }} variant="destructive">
+                      <XCircle className="h-4 w-4 mr-2" /> Reject
+                    </Button>
+                  </>
+                )}
                 {selectedInternship.cv_url && (
                   <Button onClick={() => window.open(selectedInternship.cv_url!, '_blank')}>
                     <Download className="h-4 w-4 mr-2" /> Download CV
