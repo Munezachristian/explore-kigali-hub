@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, X, Eye, EyeOff } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Plus, Pencil, Trash2, X, Eye, EyeOff, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,8 @@ const BlogEditor = () => {
   const [form, setForm] = useState(emptyPost);
   const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetchPosts(); }, []);
 
@@ -36,6 +38,24 @@ const BlogEditor = () => {
   const openEdit = (post: any) => { setEditing(post); setForm({ ...emptyPost, ...post, tags: post.tags || [] }); setShowForm(true); };
 
   const addTag = () => { if (tagInput.trim()) { setForm(f => ({ ...f, tags: [...f.tags, tagInput.trim()] })); setTagInput(''); } };
+
+  const handleCoverUpload = async (file: File) => {
+    setUploadingCover(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `blog-covers/cover-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('system-assets').upload(path, file);
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('system-assets').getPublicUrl(path);
+      setForm(f => ({ ...f, cover_image: publicUrl }));
+      toast({ title: 'Cover image uploaded' });
+    } catch (error) {
+      console.error('Cover upload error:', error);
+      toast({ title: 'Upload failed', variant: 'destructive' });
+    } finally {
+      setUploadingCover(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!form.title) { toast({ title: 'Title required', variant: 'destructive' }); return; }
@@ -99,7 +119,21 @@ const BlogEditor = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div><Label className="font-body text-sm">Cover Image URL</Label><Input value={form.cover_image} onChange={e => setForm(f => ({ ...f, cover_image: e.target.value }))} className="font-body mt-1" placeholder="https://..." /></div>
+            <div>
+              <Label className="font-body text-sm">Cover Image</Label>
+              <div className="mt-1 space-y-2">
+                {form.cover_image && (
+                  <div className="relative w-full h-32 rounded-lg overflow-hidden bg-muted">
+                    <img src={form.cover_image} alt="Cover" className="w-full h-full object-cover" />
+                    <button onClick={() => setForm(f => ({ ...f, cover_image: '' }))} className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1"><X className="w-3 h-3" /></button>
+                  </div>
+                )}
+                <Button type="button" variant="outline" size="sm" disabled={uploadingCover} onClick={() => coverInputRef.current?.click()} className="font-body w-full">
+                  <Upload className="w-4 h-4 mr-2" />{uploadingCover ? 'Uploading...' : 'Upload Cover Image'}
+                </Button>
+                <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) handleCoverUpload(e.target.files[0]); e.target.value = ''; }} />
+              </div>
+            </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label className="font-body text-sm">SEO Title</Label><Input value={form.seo_title} onChange={e => setForm(f => ({ ...f, seo_title: e.target.value }))} className="font-body mt-1" maxLength={60} /></div>
