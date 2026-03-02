@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Filter, Grid, List, Download, Heart, Eye } from 'lucide-react';
+import { Search, Grid, List, Heart, Eye } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
-const categories = ['All', 'Wildlife', 'Cultural', 'Adventure', 'Safari', 'Beach & Lake', 'City Tours', 'Mountains'];
+const categories = ['All', 'Nature', 'Wildlife', 'Culture', 'Adventure', 'Cities', 'Hotels'];
 
 const Gallery = () => {
   const { t } = useLanguage();
+  const { settings } = useSettings();
   const [gallery, setGallery] = useState<any[]>([]);
   const [filteredGallery, setFilteredGallery] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,6 +44,10 @@ const Gallery = () => {
     setFilteredGallery(filtered);
   }, [gallery, selectedCategory, searchTerm]);
 
+  const preventDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -56,6 +62,37 @@ const Gallery = () => {
       </div>
     );
   }
+
+  const WatermarkedImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => (
+    <div className="relative w-full h-full overflow-hidden select-none" onContextMenu={preventDownload} draggable={false}>
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        draggable={false}
+        style={{ pointerEvents: 'none' }}
+      />
+      {/* Watermark overlay */}
+      {settings.system_logo && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="grid grid-cols-2 grid-rows-2 gap-8 w-full h-full p-4 opacity-20">
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} className="flex items-center justify-center">
+                <img
+                  src={settings.system_logo}
+                  alt=""
+                  className="w-16 h-16 object-contain rotate-[-25deg]"
+                  draggable={false}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* Transparent overlay to block direct image interaction */}
+      <div className="absolute inset-0" style={{ background: 'transparent' }}></div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -99,15 +136,14 @@ const Gallery = () => {
                 {viewMode === 'grid' ? (
                   <>
                     <div className="relative aspect-square group">
-                      <img src={item.image_url || '/placeholder-image.jpg'} alt={item.title || 'Gallery image'} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <WatermarkedImage src={item.media_url || '/placeholder.svg'} alt={item.title || 'Gallery image'} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 z-10">
                         <div className="flex gap-2">
                           <Button size="sm" variant="secondary"><Eye className="h-4 w-4" /></Button>
                           <Button size="sm" variant="secondary"><Heart className="h-4 w-4" /></Button>
-                          <Button size="sm" variant="secondary"><Download className="h-4 w-4" /></Button>
                         </div>
                       </div>
-                      <div className="absolute top-2 right-2"><Badge variant="secondary">{item.category}</Badge></div>
+                      <div className="absolute top-2 right-2 z-10"><Badge variant="secondary">{item.category}</Badge></div>
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-foreground mb-1">{item.title}</h3>
@@ -116,9 +152,9 @@ const Gallery = () => {
                   </>
                 ) : (
                   <div className="flex gap-6 p-6">
-                    <div className="relative w-48 h-48 flex-shrink-0">
-                      <img src={item.image_url || '/placeholder-image.jpg'} alt={item.title || 'Gallery image'} className="w-full h-full object-cover rounded-lg" />
-                      <div className="absolute top-2 right-2"><Badge variant="secondary">{item.category}</Badge></div>
+                    <div className="relative w-48 h-48 flex-shrink-0 rounded-lg overflow-hidden">
+                      <WatermarkedImage src={item.media_url || '/placeholder.svg'} alt={item.title || 'Gallery image'} className="w-full h-full object-cover" />
+                      <div className="absolute top-2 right-2 z-10"><Badge variant="secondary">{item.category}</Badge></div>
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg text-foreground mb-2">{item.title}</h3>
@@ -126,7 +162,6 @@ const Gallery = () => {
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline"><Eye className="h-4 w-4 mr-1" />View</Button>
                         <Button size="sm" variant="outline"><Heart className="h-4 w-4 mr-1" />Like</Button>
-                        <Button size="sm" variant="outline"><Download className="h-4 w-4 mr-1" />Download</Button>
                       </div>
                     </div>
                   </div>
