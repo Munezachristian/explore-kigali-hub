@@ -799,33 +799,6 @@ export type Database = {
           },
         ]
       }
-      settings: {
-        Row: {
-          description: string | null
-          id: string
-          key: string
-          updated_at: string
-          updated_by: string | null
-          value: string | null
-        }
-        Insert: {
-          description?: string | null
-          id?: string
-          key: string
-          updated_at?: string
-          updated_by?: string | null
-          value?: string | null
-        }
-        Update: {
-          description?: string | null
-          id?: string
-          key?: string
-          updated_at?: string
-          updated_by?: string | null
-          value?: string | null
-        }
-        Relationships: []
-      }
       system_logs: {
         Row: {
           action: string

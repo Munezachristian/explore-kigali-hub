@@ -39,7 +39,7 @@ const Index = () => {
   useEffect(() => {
     const testConnection = async () => {
       try {
-        const { data, error } = await supabase.from('settings').select('key, value').limit(1);
+        const { data, error } = await supabase.from('system_settings').select('key, value').limit(1);
         if (error) console.error('Supabase connection error:', error);
       } catch (e) {
         console.error('Connection test failed:', e);
