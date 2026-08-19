@@ -310,10 +310,9 @@ const BookingsManager = () => {
         .insert({
           booking_id: selectedBookingForPayment.id,
           amount: paymentForm.amount,
-          method: paymentForm.method,
+          payment_method: paymentForm.method,
           status: paymentForm.status,
-          transaction_id: paymentForm.transaction_id,
-          notes: paymentForm.notes,
+          transaction_ref: paymentForm.transaction_id || paymentForm.notes || null,
           created_at: new Date().toISOString()
         });
 
