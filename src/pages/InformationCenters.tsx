@@ -25,8 +25,8 @@ interface InformationCenter {
   address: string;
   latitude: number;
   longitude: number;
-  phone: string | null;
-  email: string | null;
+  phone?: string | null;
+  email?: string | null;
   opening_hours: string | null;
   status: string;
   created_at: string;
