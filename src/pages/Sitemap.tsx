@@ -18,7 +18,7 @@ const Sitemap = () => {
       const [{ data: pkgs }, { data: posts }, { data: centers }] = await Promise.all([
         supabase.from('packages').select('id, updated_at').eq('availability', true),
         supabase.from('blog_posts').select('slug, updated_at').eq('status', 'published'),
-        supabase.from('information_centers').select('id, updated_at'),
+        supabase.from('information_centers_public').select('id, updated_at'),
       ]);
       if (pkgs) setPackages(pkgs);
       if (posts) setBlogPosts(posts);

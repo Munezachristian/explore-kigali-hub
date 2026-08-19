@@ -25,8 +25,8 @@ interface InformationCenter {
   address: string;
   latitude: number;
   longitude: number;
-  phone: string | null;
-  email: string | null;
+  phone?: string | null;
+  email?: string | null;
   opening_hours: string | null;
   status: string;
   created_at: string;
@@ -172,7 +172,7 @@ const InformationCenters = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('information_centers')
+        .from('information_centers_public')
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false });

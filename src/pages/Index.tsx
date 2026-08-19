@@ -53,7 +53,7 @@ const Index = () => {
           supabase.from('testimonials').select('*').eq('is_approved', true).limit(4),
           supabase.from('blog_posts').select('*').eq('status', 'published').limit(3),
           supabase.from('gallery').select('*').limit(6),
-          supabase.from('information_centers').select('*').eq('status', 'published').order('created_at', { ascending: false }).limit(6),
+          supabase.from('information_centers_public').select('*').eq('status', 'published').order('created_at', { ascending: false }).limit(6),
         ]);
         
         if (pkgs) setPackages(pkgs);

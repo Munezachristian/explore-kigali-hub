@@ -65,57 +65,152 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_media: {
+        Row: {
+          blog_post_id: string
+          created_at: string
+          display_order: number | null
+          file_size: number | null
+          id: string
+          is_featured: boolean | null
+          media_description: string | null
+          media_title: string | null
+          media_type: string
+          media_url: string
+          mime_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          blog_post_id: string
+          created_at?: string
+          display_order?: number | null
+          file_size?: number | null
+          id?: string
+          is_featured?: boolean | null
+          media_description?: string | null
+          media_title?: string | null
+          media_type: string
+          media_url: string
+          mime_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          blog_post_id?: string
+          created_at?: string
+          display_order?: number | null
+          file_size?: number | null
+          id?: string
+          is_featured?: boolean | null
+          media_description?: string | null
+          media_title?: string | null
+          media_type?: string
+          media_url?: string
+          mime_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_media_blog_post_id_fkey"
+            columns: ["blog_post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author_id: string | null
           category: string | null
+          comment_count: number | null
           content: string | null
+          content_type: string | null
           cover_image: string | null
           created_at: string
           excerpt: string | null
+          featured_image: string | null
           id: string
+          is_featured: boolean | null
+          like_count: number | null
+          media_layout: string | null
+          media_urls: string[] | null
+          meta_description: string | null
+          more_info_links: Json | null
+          og_image: string | null
           published_at: string | null
+          reading_time: number | null
           seo_description: string | null
+          seo_keywords: string | null
           seo_title: string | null
           slug: string
           status: string | null
           tags: string[] | null
           title: string
           updated_at: string
+          video_url: string | null
+          view_count: number | null
         }
         Insert: {
           author_id?: string | null
           category?: string | null
+          comment_count?: number | null
           content?: string | null
+          content_type?: string | null
           cover_image?: string | null
           created_at?: string
           excerpt?: string | null
+          featured_image?: string | null
           id?: string
+          is_featured?: boolean | null
+          like_count?: number | null
+          media_layout?: string | null
+          media_urls?: string[] | null
+          meta_description?: string | null
+          more_info_links?: Json | null
+          og_image?: string | null
           published_at?: string | null
+          reading_time?: number | null
           seo_description?: string | null
+          seo_keywords?: string | null
           seo_title?: string | null
           slug: string
           status?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
+          video_url?: string | null
+          view_count?: number | null
         }
         Update: {
           author_id?: string | null
           category?: string | null
+          comment_count?: number | null
           content?: string | null
+          content_type?: string | null
           cover_image?: string | null
           created_at?: string
           excerpt?: string | null
+          featured_image?: string | null
           id?: string
+          is_featured?: boolean | null
+          like_count?: number | null
+          media_layout?: string | null
+          media_urls?: string[] | null
+          meta_description?: string | null
+          more_info_links?: Json | null
+          og_image?: string | null
           published_at?: string | null
+          reading_time?: number | null
           seo_description?: string | null
+          seo_keywords?: string | null
           seo_title?: string | null
           slug?: string
           status?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
+          video_url?: string | null
+          view_count?: number | null
         }
         Relationships: []
       }
@@ -417,10 +512,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_information_center"
+            columns: ["information_center_id"]
+            isOneToOne: false
+            referencedRelation: "information_centers_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "information_center_media_information_center_id_fkey"
             columns: ["information_center_id"]
             isOneToOne: false
             referencedRelation: "information_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "information_center_media_information_center_id_fkey"
+            columns: ["information_center_id"]
+            isOneToOne: false
+            referencedRelation: "information_centers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -930,6 +1039,59 @@ export type Database = {
         }
         Relationships: []
       }
+      umurage_kids_applications: {
+        Row: {
+          admin_notes: string | null
+          child_age: number | null
+          child_name: string
+          created_at: string
+          id: string
+          message: string | null
+          parent_email: string
+          parent_name: string
+          parent_phone: string | null
+          program_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          child_age?: number | null
+          child_name: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          parent_email: string
+          parent_name: string
+          parent_phone?: string | null
+          program_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          child_age?: number | null
+          child_name?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          parent_email?: string
+          parent_name?: string
+          parent_phone?: string | null
+          program_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "umurage_kids_applications_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "umurage_kids_center"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       umurage_kids_center: {
         Row: {
           category: string | null
@@ -1023,6 +1185,53 @@ export type Database = {
         }
         Relationships: []
       }
+      volunteer_applications: {
+        Row: {
+          activity_id: string | null
+          admin_notes: string | null
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          activity_id?: string | null
+          admin_notes?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string | null
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_applications_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "volunteerism_activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       volunteerism_activities: {
         Row: {
           created_at: string
@@ -1070,7 +1279,77 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      comments_public: {
+        Row: {
+          author_name: string | null
+          content: string | null
+          created_at: string | null
+          id: string | null
+          post_id: string | null
+        }
+        Insert: {
+          author_name?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          post_id?: string | null
+        }
+        Update: {
+          author_name?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          post_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      information_centers_public: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          latitude: number | null
+          longitude: number | null
+          name: string | null
+          opening_hours: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          opening_hours?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          opening_hours?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_highest_user_role: {
