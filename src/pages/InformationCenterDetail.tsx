@@ -66,12 +66,25 @@ const InformationCenterDetail = () => {
   const fetchCenter = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('information_centers')
+      const { data: publicData, error } = await supabase
+        .from('information_centers_public')
         .select('*')
         .eq('id', id)
-        .eq('status', 'published')
-        .single();
+        .maybeSingle();
+
+      // Contact details are only available to signed-in users
+      let contact: { phone: string | null; email: string | null } = { phone: null, email: null };
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session && publicData) {
+        const { data: privateData } = await supabase
+          .from('information_centers')
+          .select('phone, email')
+          .eq('id', id)
+          .maybeSingle();
+        if (privateData) contact = privateData;
+      }
+
+      const data = publicData ? { ...publicData, ...contact } : null;
       
       if (error) throw error;
       
