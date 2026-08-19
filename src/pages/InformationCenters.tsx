@@ -172,7 +172,7 @@ const InformationCenters = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('information_centers')
+        .from('information_centers_public')
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false });
